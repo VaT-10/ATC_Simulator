@@ -1,0 +1,21 @@
+                        -HD:\ATC_simulator\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=30
+-DANDROID_PLATFORM=android-30
+-DANDROID_ABI=arm64-v8a
+-DCMAKE_ANDROID_ARCH_ABI=arm64-v8a
+-DANDROID_NDK=D:\Unity Hub\Unity\Hub\Editor\6000.0.41f1\Editor\Data\PlaybackEngines\AndroidPlayer\NDK
+-DCMAKE_ANDROID_NDK=D:\Unity Hub\Unity\Hub\Editor\6000.0.41f1\Editor\Data\PlaybackEngines\AndroidPlayer\NDK
+-DCMAKE_TOOLCHAIN_FILE=D:\Unity Hub\Unity\Hub\Editor\6000.0.41f1\Editor\Data\PlaybackEngines\AndroidPlayer\NDK\build\cmake\android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=D:\Unity Hub\Unity\Hub\Editor\6000.0.41f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\cmake\3.22.1\bin\ninja.exe
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=D:\ATC_simulator\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\325h4y5m\obj\arm64-v8a
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=D:\ATC_simulator\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\325h4y5m\obj\arm64-v8a
+-DCMAKE_BUILD_TYPE=RelWithDebInfo
+-DCMAKE_FIND_ROOT_PATH=D:\ATC_simulator\.utmp\RelWithDebInfo\325h4y5m\prefab\arm64-v8a\prefab
+-BD:\ATC_simulator\.utmp\RelWithDebInfo\325h4y5m\arm64-v8a
+-GNinja
+-DANDROID_STL=c++_shared
+-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON
+                        Build command args: []
+                        Version: 2

@@ -1,0 +1,45 @@
+Boeing 737
+Boeing 747
+Boeing 757
+Boeing 767
+Boeing 777
+Boeing 787
+Boeing 707
+Boeing 727
+Boeing 717
+Airbus A220
+Airbus A300
+Airbus A310
+Airbus A318
+Airbus A319
+Airbus A320
+Airbus A321
+Airbus A330
+Airbus A340
+Airbus A350
+Airbus A380
+McDonnell Douglas DC-10
+McDonnell Douglas MD-11
+McDonnell Douglas MD-80
+McDonnell Douglas MD-90
+Embraer E170
+Embraer E175
+Embraer E190
+Embraer E195
+Bombardier CRJ100
+Bombardier CRJ200
+Bombardier CRJ700
+Bombardier CRJ900
+Bombardier CRJ1000
+ATR 42
+ATR 72
+Tupolev Tu-134
+Tupolev Tu-154
+Tupolev Tu-204
+Tupolev Tu-214
+Ilyushin Il-62
+Ilyushin Il-86
+Ilyushin Il-96
+Sukhoi Superjet 100
+Comac C919
+Comac ARJ21

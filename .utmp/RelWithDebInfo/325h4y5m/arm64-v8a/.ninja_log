@@ -1,0 +1,23 @@
+# ninja log v5
+44	8086	7631315721039368	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	806374106f1df894
+290	2690	7631315667070114	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	a3194d3113a0c745
+181	6774	7631315708018760	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	caa336e462373236
+2694	4072	7631315679256141	D:/ATC_simulator/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/325h4y5m/obj/arm64-v8a/libswappywrapper.so	595eee1bd33700b8
+208	6853	7631315708849023	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	5803d74185c3a467
+266	7097	7631315711300750	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	84b473c33bef8bad
+123	6965	7631315709960612	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	4422cddc666df5e2
+3	7170	7631315712034443	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	5f043cc2d32a5893
+244	6974	7631315709960612	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	97515a466c99798
+148	7741	7631315717792440	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	df989662e98172ba
+8087	8731	7631315727616186	D:/ATC_simulator/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/325h4y5m/obj/arm64-v8a/libgame.so	1b94b9360f57c0e2
+3579	10372	7667137074519524	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	a3194d3113a0c745
+10373	15759	7667137126783098	D:/ATC_simulator/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/325h4y5m/obj/arm64-v8a/libswappywrapper.so	595eee1bd33700b8
+3462	26867	7667137240694939	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	5803d74185c3a467
+318	27499	7667137247121800	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	4422cddc666df5e2
+2416	27606	7667137248064876	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	caa336e462373236
+3508	27614	7667137248135530	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	97515a466c99798
+541	27684	7667137248608834	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	5f043cc2d32a5893
+3550	27751	7667137249570419	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	84b473c33bef8bad
+3421	28584	7667137257827149	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	df989662e98172ba
+480	28611	7667137258009488	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	806374106f1df894
+28612	30813	7667137280326189	D:/ATC_simulator/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/325h4y5m/obj/arm64-v8a/libgame.so	1b94b9360f57c0e2

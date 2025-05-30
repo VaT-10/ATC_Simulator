@@ -2,69 +2,104 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Managers;
+using System;
 
 public class PlaneGeneratorScript : MonoBehaviour
 {
     private float[] _planesYs = { 0.9f, 1.6f, 2.28f, 2.97f };  // координаты y на которых может появиться самолет
     private float[] _planesXs = { 3.7f, -3.7f };  // координаты x на которых может появиться самолет, т.е. справа и слева от экрана.
-    private Dictionary<float, Vector2> _planesScreenDirections;  // словарь соответствий planesXs направлениям движения
 
-    public float spawnRate;  // время, проходящее между генерацией самолетов
-    public GameObject plane;  // префаб самолета
+    [SerializeField] private float _spawnRate;  // время, проходящее между генерацией самолетов
+    [SerializeField] private GameObject _plane;  // префаб самолета
+
+    [SerializeField] private GameObject _mapBackground;
 
     private float _timer;  // таймер, используемый для подсчета времени, прошедшего со спавна предыдущего самолета. увеличивается на Time.deltaTime каждый кадр.
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
     void Start()
     {
+        CheckArgs();
         TMPFlightInfoUIGroup.ClearAllText();
-        _planesScreenDirections = new Dictionary<float, Vector2>  // инициализация словаря planesScreenDirections
-        {
-            [_planesXs.Max()] = Vector2.left,
-            [_planesXs.Min()] = Vector2.right
-        };
-        createPlane();  // создание первого самолета
+        CreatePlane();  // создание первого самолета
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (_timer >= spawnRate)
+        if (_timer >= _spawnRate)
         {
             _timer = 0;
-            createPlane();  // обнуление таймера и создание самолета при прохождении определенного времени, указанного в переменной spawnRate
+            CreatePlane();
         }
         else
         {
-            _timer += Time.deltaTime;  // увеличение таймера на время, прошедшее с предыдущего кадра
+            _timer += Time.deltaTime;
         }
     }
 
-    public void createPlane()
+    private void CheckArgs()
     {
-        /// <summary>
-        /// функция создает и настраивает новую копию префаба самолета
-        /// </summary>
-        float planeY = _planesYs[Random.Range(0, _planesYs.Length)];  // выбор случайной координаты y для появления самолета
-        float planeX = _planesXs[Random.Range(0, _planesXs.Length)];  // выбор случайной координаты x для появления самолета
+        if (_plane == null)
+        {
+            throw new NullReferenceException("The plane prefab is missing.");
+        }
+        if (_mapBackground == null)
+        {
+            throw new NullReferenceException("The gameObject of mapBackground is missing.");
+        }
+        if (_spawnRate <= 0)
+        {
+            throw new ArgumentOutOfRangeException($"The spawnRate should be greater than 0, got {_spawnRate}");
+        }
 
-        Vector3 planeScreenDirection = _planesScreenDirections[planeX];  // выбор направления движения самолета на основе координаты x
+    }
 
-        #if UNITY_EDITOR
-        Debug.Log($"planeY: {planeY}, planeX: {planeX}, planeScreenDirection: {planeScreenDirection}");  // логирование о появлении самолета и его данных для отладки
-        #endif
+    /// <summary>
+    /// функция создает и настраивает новую копию префаба самолета
+    /// </summary>
+    private void CreatePlane()
+    {
+        Vector3 planeCoordinates = GetRandomSpawnPos();
 
-        GameObject generatedPlane = Instantiate(plane, new Vector3(planeX, planeY), Quaternion.identity);  // создание копии префаба для дальнейшей настройки
+        GameObject generatedPlane = InstantiatePlane(planeCoordinates);
+        SetPlaneDirection(generatedPlane);
+    }
 
-        generatedPlane.GetComponent<Plane>().screenDirection = planeScreenDirection;  // передавание направления движения по экрану скрипту самолета
+    /// <summary>
+    /// возвращает две случайные координаты x и y из списков _planesYs и _planesXs соответственно
+    /// </summary>
+    /// <returns>две случайные координаты x и y</returns>
+    private Vector3 GetRandomSpawnPos()
+    {
+        float planeX = _planesXs[UnityEngine.Random.Range(0, _planesXs.Length)];
+        float planeY = _planesYs[UnityEngine.Random.Range(0, _planesYs.Length)]; 
+
+        return new Vector3(planeX, planeY);
+    }
+
+    /// <summary>
+    /// устанавливает направление самолета
+    /// </summary>
+    /// <param name="plane">объект самолета</param>
+    private void SetPlaneDirection(GameObject plane)
+    {
+        Vector3 planeScreenDirection = (plane.transform.position.x < 0)? Vector3.right : Vector3.left;  // выбор направления движения самолета на основе координаты x
+
+        plane.GetComponent<Plane>().screenDirection = planeScreenDirection;
 
         if (planeScreenDirection == Vector3.left)  // при движении влево необходимо развернуть самолет в другую сторону. эта проверка и делает это
         {
-            Vector3 scale = generatedPlane.transform.localScale;  // получение текущего scale сгенерированного самолета
-            scale.x *= -1;  // разворот самолета посредством умножения x из scale на -1, делая его отрицательным
-            generatedPlane.transform.localScale = scale;  // возвращение отредактированного scale на самолет
+            Vector3 scale = plane.transform.localScale;
+            scale.x *= -1;
+            plane.transform.localScale = scale; 
         }
-
     }
+
+    /// <summary>
+    /// создает новый самолет в определенных координатах
+    /// </summary>
+    /// <param name="planeCoordinates">координаты самолета в виде кортежа, где первый элемент - x, а второй - y</param>
+    /// <returns>объект созданного самолета</returns>
+    private GameObject InstantiatePlane(Vector3 planeCoordinates) { return Instantiate(_plane, planeCoordinates, Quaternion.identity, _mapBackground.transform); }
 
 }

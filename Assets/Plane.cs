@@ -162,10 +162,10 @@ public class Plane : MonoBehaviour, IPointerClickHandler
         GenerateFlightInfo();
         moveSpeed = 0.1f;  // установка скорости движения по экрану. 1.5f - временное значение, в будущем будет вычисляться на основе speed.
 
-        SelectPlaneManager.onSelect += onSelect;
+        SelectPlaneManager.onSelect += OnSelect;
     }
 
-    private void onSelect(Plane selectedScript)
+    private void OnSelect(Plane selectedScript)
     {
         if (isSelected) {
             _selectManager.deSelectObject(this);
@@ -203,7 +203,7 @@ public class Plane : MonoBehaviour, IPointerClickHandler
 
     private void OnDestroy()
     {
-        SelectPlaneManager.onSelect -= onSelect;
+        SelectPlaneManager.onSelect -= OnSelect;
     }
 
 }

@@ -1,8 +1,6 @@
 using System;
-using System.Data;
-using System.Diagnostics.Tracing;
+using System.ComponentModel;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Managers
@@ -61,16 +59,24 @@ namespace Managers
         /// <param name="canvas">канвас, относительно которого мен€етс€ высота элемента</param>
         /// <param name="element">сам элемент дл€ изменени€ размера</param>
         /// <param name="preserveAspect">важный параметр, определ€ющий, необходимо ли оставить пропорции</param>
-        public static void SetHeightPercentage(float percentage, Canvas canvas, GameObject element, bool preserveAspect = true)
+        public static void SetHeightByCanvasPercent(float percentage, Canvas canvas, GameObject element, bool preserveAspect = true)
         {
             CheckArgs(percentage, canvas, element);
 
-            var canvasHeight = canvas.GetComponent<RectTransform>().rect.height;
+            var canvasRect = canvas.GetComponent<RectTransform>().rect;
+
             var rectTransform = element.GetComponent<RectTransform>();
 
-            var newHeight = canvasHeight / 100f * percentage;
-            float newWidth = preserveAspect ? GetRectTransformAspect(rectTransform) * newHeight : rectTransform.sizeDelta.x;
+            var newHeight = canvasRect.height / 100f * percentage;
+            var aspect = GetRectTransformAspect(rectTransform);
 
+            float newWidth = preserveAspect ? aspect * newHeight : rectTransform.sizeDelta.y;
+
+            if (newWidth > canvasRect.width)
+            {
+                newWidth = canvasRect.width;
+                newHeight = newWidth / aspect;
+            }
             rectTransform.sizeDelta = new Vector2(newWidth, newHeight);
         }
 
@@ -81,17 +87,24 @@ namespace Managers
         /// <param name="canvas">канвас, относительно которого мен€етс€ ширина элемента</param>
         /// <param name="element">сам элемент дл€ изменени€ размера</param>
         /// <param name="preserveAspect">важный параметр, определ€ющий, необходимо ли оставить пропорции</param>
-        public static void SetWidthPercentage(float percentage, Canvas canvas, GameObject element, bool preserveAspect = true)
+        public static void SetWidthByCanvasPercent(float percentage, Canvas canvas, GameObject element, bool preserveAspect = true)
         {
             CheckArgs(percentage, canvas, element);
 
-            var canvasWidth = canvas.GetComponent<RectTransform>().rect.width;
+            var canvasRect = canvas.GetComponent<RectTransform>().rect;
+
             var rectTransform = element.GetComponent<RectTransform>();
 
-            var newWidth = canvasWidth / 100f * percentage;
+            var newWidth = canvasRect.width / 100f * percentage;
+            var aspect = GetRectTransformAspect(rectTransform);
 
-            float newHeight = preserveAspect ? newWidth / GetRectTransformAspect(rectTransform) : rectTransform.sizeDelta.y;
+            float newHeight = preserveAspect ? newWidth / aspect : rectTransform.sizeDelta.x;
 
+            if (newHeight > canvasRect.height)
+            {
+                newHeight = canvasRect.height;
+                newWidth = newHeight * aspect;
+            }
             rectTransform.sizeDelta = new Vector2(newWidth, newHeight);
         }
 
@@ -103,9 +116,9 @@ namespace Managers
         /// <param name="element">сам элемент дл€ изменени€ размера</param>
         private static void CheckArgs(float percentage, Canvas canvas, GameObject element)
         {
-            if (percentage <= 0)
+            if (percentage < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(percentage), $"Percentage must be more than 0, got {percentage}");
+                throw new ArgumentOutOfRangeException(nameof(percentage), $"Percentage must be greater than or equal to 0, got {percentage}");
             }
             if (canvas == null)
             {
@@ -119,11 +132,11 @@ namespace Managers
             var rt = element.GetComponent<RectTransform>();
             if (rt == null)
             {
-                throw new MissingComponentException("RectTransform component required!");
+                throw new MissingComponentException($"RectTransform component required! Please add it to the \"{element.name}\" element.");
             }
             if (rt.anchorMax != rt.anchorMin)
             {
-                throw new Exception($"The anchors of element \"{element.name}\" are not the same. The result may differ from the expected one.");
+                throw new InvalidOperationException($"The anchors of element \"{element.name}\" are not the same. Set anchorMin and anchorMax to the same value to get the expected result.");
             }
         }
 
@@ -137,7 +150,12 @@ namespace Managers
             var width = rectTransform.sizeDelta.x;
             var height = rectTransform.sizeDelta.y;
 
-            return (height != 0)? width / height : width;
+            if (Mathf.Approximately(height, 0))
+            {
+                throw new ArgumentOutOfRangeException("Height must be greater than 0");
+            }
+
+            return width / height;
         }
     }
 }

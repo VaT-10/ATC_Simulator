@@ -1,16 +1,14 @@
 using UnityEngine;
+using Managers;
 
 public class UIInitializer : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
+    public Canvas canvas;
+    public GameObject infoPanel;
+
     void Start()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        UISizeManager.SetHeightByCanvasPercent(45f, canvas, infoPanel);
     }
 }

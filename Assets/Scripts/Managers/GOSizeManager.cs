@@ -60,15 +60,40 @@ namespace Managers
         }
 
         /// <summary>
+        /// позволяет получить размеры экрана по осям X/Y в мировых координатах
+        /// </summary>
+        /// <param name="axis">ось</param>
+        /// <returns>размер экрана по оси axis</returns>
+        /// <exception cref="ArgumentException">возбуждается при получении Z-оси в axis</exception>
+        public static float GetScreenSizeAlongAxis(Axis axis)
+        {
+            var camera = Camera.main;
+            if (axis == Axis.Z)
+            {
+                throw new ArgumentException($"Cannot get screen size along Z axis (it's 2D, you idiot)!");
+            }
+
+            var screenHeight = camera.orthographicSize * 2;
+            return axis == Axis.Y ? screenHeight : screenHeight * (Screen.width / Screen.height);
+
+            // f лягушке.
+        }
+
+        /// <summary>
         /// выставляет размер объекта по определенной оси в мировых координатах.
         /// </summary>
         /// <param name="gameObject">игровой объект, размер которого необходимо поменять.</param>
         /// <param name="axis">ось, по которой необходимо менять размер</param>
         /// <param name="targetSize">целевой размер объекта</param>
-        /// <param name="preserveAspect">важный парамет, определяющий, нужно ли сохранять соотношение сторон объекта</param>
+        /// <param name="preserveAspect">важный параметр, определяющий, нужно ли сохранять соотношение сторон объекта</param>
         /// <exception cref="ArgumentOutOfRangeException">возбуждается при нулевом scale по оси у объекта</exception>
         public static void SetGOSizeAlongAxis(GameObject gameObject, Axis axis, float targetSize, bool preserveAspect = true)
         {
+            if (targetSize < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(targetSize), "Target size must not be negative (do you seriously think I can make object smaller than it can be?)");
+            }
+
             Vector3 localScale = gameObject.transform.localScale;
 
             Axis[] axes = { Axis.X, Axis.Y, Axis.Z };
@@ -104,7 +129,21 @@ namespace Managers
         }
 
         /// <summary>
-        /// находит валидный рендерер на объекте
+        /// выставляет размер объекта по определенной оси в процентах от экрана.
+        /// </summary>
+        /// <param name="gameObject">игровой объект, размер которого необходимо поменять.</param>
+        /// <param name="axis">ось, по которой необходимо менять размер</param>
+        /// <param name="targetPercentage">параметр, определяющий, сколько процентов от экрана по оси Axis будет занимать gameObject</param>
+        /// <param name="preserveAspect">важный параметр, определяющий, нужно ли сохранять соотношение сторон объекта</param>
+        public static void SetGOSizePercent(GameObject gameObject, Axis axis, float targetPercentage, bool preserveAspect)
+        {
+            var targetSize = (GetScreenSizeAlongAxis(axis) / 100f) * targetPercentage;
+
+            SetGOSizeAlongAxis(gameObject, axis, targetSize, preserveAspect: preserveAspect);  // Нокс, знай, ты лучшая морская свинка в мире
+        }
+
+        /// <summary>
+        /// находит валидный рендерер на объекте, используется для получения размеров игровых объектов
         /// </summary>
         /// <param name="gameObject">игровой объект</param>
         /// <returns>валидный рендерер</returns>

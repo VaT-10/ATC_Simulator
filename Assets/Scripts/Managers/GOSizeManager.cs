@@ -1,7 +1,5 @@
-﻿using JetBrains.Annotations;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO.Compression;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -36,14 +34,14 @@ namespace Managers
     /// <summary>
     /// менеджер размеров игровых объектов
     /// </summary>
-    /// <exception cref="TooManyComponentsException">выбрасывается при наличии больше одного коллайдера на объекте</exception>
+    /// <exception cref="TooManyComponentsException">выбрасывается при наличии больше одного рендерера на объекте</exception>
     public static class GOSizeManager
     {
         /// <summary>
         /// функция для получения размера игрового объекта по определенной оси по его рендереру
         /// </summary>
         /// <param name="gameObject">игровой объект, размер которого необходимо получить</param>
-        /// <param name="axis">измеряеммая ось</param>
+        /// <param name="axis">измеряемая ось</param>
         /// <returns>размер игрового объекта по определенной оси</returns>
         public static float GetGOSizeAlongAxis(GameObject gameObject, Axis axis)
         {
@@ -74,7 +72,8 @@ namespace Managers
             }
 
             var screenHeight = camera.orthographicSize * 2;
-            return axis == Axis.Y ? screenHeight : screenHeight * (Screen.width / Screen.height);
+            Debug.Log($"{screenHeight}, {camera}, {Screen.width / (float)Screen.height}");
+            return axis == Axis.Y ? screenHeight : screenHeight * (Screen.width / (float)Screen.height);
 
             // f лягушке.
         }
@@ -91,7 +90,7 @@ namespace Managers
         {
             if (targetSize < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(targetSize), "Target size must not be negative (do you seriously think I can make object smaller than it can be?)");
+                throw new ArgumentOutOfRangeException(nameof(targetSize), "Target size must not be negative (do you seriously think I can make an object smaller than it can be?)");
             }
 
             Vector3 localScale = gameObject.transform.localScale;
@@ -126,6 +125,7 @@ namespace Managers
             }
 
             gameObject.transform.localScale = new Vector3(scales[0], scales[1], scales[2]);
+            Debug.Log("Scale changed successfully!");
         }
 
         /// <summary>
@@ -135,11 +135,13 @@ namespace Managers
         /// <param name="axis">ось, по которой необходимо менять размер</param>
         /// <param name="targetPercentage">параметр, определяющий, сколько процентов от экрана по оси Axis будет занимать gameObject</param>
         /// <param name="preserveAspect">важный параметр, определяющий, нужно ли сохранять соотношение сторон объекта</param>
-        public static void SetGOSizePercent(GameObject gameObject, Axis axis, float targetPercentage, bool preserveAspect)
+        public static void SetGOSizePercent(GameObject gameObject, Axis axis, float targetPercentage, bool preserveAspect=true)
         {
             var targetSize = (GetScreenSizeAlongAxis(axis) / 100f) * targetPercentage;
 
             SetGOSizeAlongAxis(gameObject, axis, targetSize, preserveAspect: preserveAspect);  // Нокс, знай, ты лучшая морская свинка в мире
+            Debug.Log("Trying to set GO size! Target size: " + targetSize.ToString());
+            Debug.Log($"{GetScreenSizeAlongAxis(axis)}, {targetPercentage}");
         }
 
         /// <summary>
@@ -151,7 +153,7 @@ namespace Managers
         /// <exception cref="TooManyComponentsException">выбрасывается при 2+ рендерерах</exception>
         private static Renderer GetValidRenderer(GameObject gameObject)
         {
-            var renderers = gameObject.GetComponents<Renderer>();
+            var renderers = gameObject.GetComponents<SpriteRenderer>();
             var rendererCount = renderers.Length;
 
             if (rendererCount == 0)
@@ -161,7 +163,7 @@ namespace Managers
 
             if (rendererCount > 1)
             {
-                throw new TooManyComponentsException(typeof(Renderer), gameObject, $"More than one renderer has been found on the {gameObject.name} gameObject.");
+                throw new TooManyComponentsException(typeof(Renderer), gameObject, $"More than one renderer has been found on the {gameObject.name} gameObject: {rendererCount}");
             }
 
             return renderers[0];

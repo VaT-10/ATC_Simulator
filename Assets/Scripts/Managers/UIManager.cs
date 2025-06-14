@@ -116,6 +116,18 @@ namespace Managers
             rectTransform.pivot = new Vector2(0.5f, 0f);
         }
 
+        public static void SetPivot(Vector2 pivot, GameObject element)
+        {
+            RectTransform rectTransform;
+            if (element.TryGetComponent(out rectTransform))
+            {
+                rectTransform.pivot = pivot;
+            } else
+            {
+                throw new MissingComponentException("The RectTransform component is missing! Please add it for using this function.");
+            }
+        }
+
         /// <summary>
         /// функция для проверки аргументов для изменения размера в процентах на валидность
         /// </summary>

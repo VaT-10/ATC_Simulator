@@ -5,20 +5,20 @@ using UnityEngine;
 using UnityEngine.Animations;
 
 
-[Serializable] 
+[Serializable]
 public class TooManyComponentsException : Exception
 {
-    public Type Type {  get; private set; }
+    public Type Type { get; private set; }
     public GameObject GameObject { get; private set; }
     public TooManyComponentsException() { }
     public TooManyComponentsException(string message) : base(message) { }
     public TooManyComponentsException(string message, Exception inner) : base(message, inner) { }
-    public TooManyComponentsException(Type type, string message) 
-        : base($"Type: {type.Name}. {message}") 
+    public TooManyComponentsException(Type type, string message)
+        : base($"Type: {type.Name}. {message}")
     {
         Type = type;
     }
-    public TooManyComponentsException(Type type, GameObject gameObject, string message) 
+    public TooManyComponentsException(Type type, GameObject gameObject, string message)
         : base($"Type: {type.Name}, GameObject: {gameObject.name}. {message}")
     {
         Type = type;
@@ -37,6 +37,15 @@ namespace Managers
     /// <exception cref="TooManyComponentsException">выбрасывается при наличии больше одного рендерера на объекте</exception>
     public static class GOSizeManager
     {
+        private static Camera _cachedCamera;
+        private static Dictionary<GameObject, SpriteRenderer> _rendererCache = new Dictionary<GameObject, SpriteRenderer>();
+        public enum CacheType
+        {
+            CameraCache,
+            RendererCache,
+            All
+        };  // для определения типа кэша, который необходимо очищать
+
         /// <summary>
         /// функция для получения размера игрового объекта по определенной оси по его рендереру
         /// </summary>
@@ -47,14 +56,14 @@ namespace Managers
         {
             Renderer renderer = GetValidRenderer(gameObject);
 
-            var axisToSize = new Dictionary<Axis, float>()
+            return axis switch
             {
-                {Axis.X, renderer.bounds.size.x},
-                {Axis.Y, renderer.bounds.size.y},
-                {Axis.Z, renderer.bounds.size.z}
-            };  // создаем словарь соответствий между каждой осью и соответствующей
-
-            return axisToSize[axis];
+                Axis.X => renderer.bounds.size.x,
+                Axis.Y => renderer.bounds.size.y,
+                Axis.Z => renderer.bounds.size.z,
+                Axis.None => throw new ArgumentException(nameof(axis)),
+                _ => throw new ArgumentException(nameof(axis)),
+            };
         }
 
         /// <summary>
@@ -65,14 +74,17 @@ namespace Managers
         /// <exception cref="ArgumentException">возбуждается при получении Z-оси в axis</exception>
         public static float GetScreenSizeAlongAxis(Axis axis)
         {
-            var camera = Camera.main;
-            if (axis == Axis.Z)
+            if (_cachedCamera == null)
             {
-                throw new ArgumentException($"Cannot get screen size along Z axis (it's 2D, you idiot)!");
+                _cachedCamera = Camera.main;
             }
 
-            var screenHeight = camera.orthographicSize * 2;
-            Debug.Log($"{screenHeight}, {camera}, {Screen.width / (float)Screen.height}");
+            if (axis == Axis.Z)
+            {
+                throw new ArgumentException($"Cannot get screen size along Z axis (how can you see the third dimension in 2D?)!");
+            }
+
+            var screenHeight = _cachedCamera.orthographicSize * 2;
             return axis == Axis.Y ? screenHeight : screenHeight * (Screen.width / (float)Screen.height);
 
             // f лягушке.
@@ -98,9 +110,14 @@ namespace Managers
             Axis[] axes = { Axis.X, Axis.Y, Axis.Z };
             float[] scales = { localScale.x, localScale.y, localScale.z };
 
-            var axisToScale = axes.Zip(scales, (axis, scale) => (axis, scale)).ToDictionary(t => t.axis, t => t.scale);  // нужен для получения значения scale по оси
-
-            float curTargetAxisScale = axisToScale[axis];
+            var curTargetAxisScale = axis switch
+            {
+                Axis.X => localScale.x,
+                Axis.Y => localScale.y,
+                Axis.Z => localScale.z,
+                Axis.None => throw new ArgumentException(nameof(axis)),
+                _ => throw new ArgumentException(nameof(axis)),
+            };
 
             if (Mathf.Approximately(curTargetAxisScale, 0))
             {
@@ -125,7 +142,6 @@ namespace Managers
             }
 
             gameObject.transform.localScale = new Vector3(scales[0], scales[1], scales[2]);
-            Debug.Log("Scale changed successfully!");
         }
 
         /// <summary>
@@ -135,13 +151,11 @@ namespace Managers
         /// <param name="axis">ось, по которой необходимо менять размер</param>
         /// <param name="targetPercentage">параметр, определяющий, сколько процентов от экрана по оси Axis будет занимать gameObject</param>
         /// <param name="preserveAspect">важный параметр, определяющий, нужно ли сохранять соотношение сторон объекта</param>
-        public static void SetGOSizePercent(GameObject gameObject, Axis axis, float targetPercentage, bool preserveAspect=true)
+        public static void SetGOSizePercent(GameObject gameObject, Axis axis, float targetPercentage, bool preserveAspect = true)
         {
             var targetSize = (GetScreenSizeAlongAxis(axis) / 100f) * targetPercentage;
 
             SetGOSizeAlongAxis(gameObject, axis, targetSize, preserveAspect: preserveAspect);  // Нокс, знай, ты лучшая морская свинка в мире
-            Debug.Log("Trying to set GO size! Target size: " + targetSize.ToString());
-            Debug.Log($"{GetScreenSizeAlongAxis(axis)}, {targetPercentage}");
         }
 
         /// <summary>
@@ -153,6 +167,10 @@ namespace Managers
         /// <exception cref="TooManyComponentsException">выбрасывается при 2+ рендерерах</exception>
         private static Renderer GetValidRenderer(GameObject gameObject)
         {
+            if (_rendererCache.TryGetValue(gameObject, out var cachedRenderer))
+            {
+                return cachedRenderer;
+            }
             var renderers = gameObject.GetComponents<SpriteRenderer>();
             var rendererCount = renderers.Length;
 
@@ -166,7 +184,21 @@ namespace Managers
                 throw new TooManyComponentsException(typeof(Renderer), gameObject, $"More than one renderer has been found on the {gameObject.name} gameObject: {rendererCount}");
             }
 
+            _rendererCache[gameObject] = renderers[0];  // кэшируем рендерер для последующего использования
+
             return renderers[0];
+        }
+
+        public static void ClearCache(CacheType cacheType = CacheType.All)
+        {
+            if (cacheType == CacheType.CameraCache || cacheType == CacheType.All)
+            {
+                _cachedCamera = null;  // очищаем кэш камеры
+            }
+            if (cacheType == CacheType.RendererCache || cacheType == CacheType.All)
+            {
+                _rendererCache.Clear();  // очищаем кэш рендереров
+            }
         }
     }
 

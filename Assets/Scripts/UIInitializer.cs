@@ -15,9 +15,9 @@ public class UIInitializer : MonoBehaviour
     {
         UISizeManager.SetDownCenterAnchors(infoPanel);
         UISizeManager.SetPivot(INFO_PANEL_PIVOT, infoPanel);
-        UISizeManager.SetHeightByCanvasPercent(45f, canvas, infoPanel);
+        GOSizeManager.SetGOSizePercent(infoPanel, Axis.Y, 50f);
 
-        GOSizeManager.SetGOSizePercent(mapBackground, Axis.X, 100f);
+        GOSizeManager.SetGOSizePercent(mapBackground, Axis.X, 75f);
     }
 
 }

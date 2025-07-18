@@ -107,19 +107,20 @@ public class FlightInformationGenerator
 [RequireComponent(typeof(SpriteRenderer), typeof(Rigidbody2D))]
 public class Plane : MonoBehaviour, IPointerClickHandler
 {
-    public int speed;  // скорость самолета в км/ч. отображается в окне инофрмации о самолете.
-    public int altitude;  // высота полета самолета в км. отображается в окне инофрмации о самолете.
-    public string flightName;  // уникальное имя рейса самолета, например "AB1234". отображается в окне инофрмации о самолете.
-    public string planeModel;  // название модели самолета, например, "Boeing 737". отображается в окне инофрмации о самолете.
-    public string destination;  // пункт назначения на английском языке, например, "Saint Petersburg". отображается в окне инофрмации о самолете.
-    public string startingPlace;  // точка отправления на английском языке, например, "Moscow". отображается в окне инофрмации о самолете.
-    public string direction;  // состояние самолета на английском языке. например, "horizontal flight", "climbing", "falling", "landing" и т.д. отображается в окне инофрмации о самолете стрелками. 
-    public float moveSpeed;  // скорость движения объекта самолета по экрану.
+    [HideInInspector] int speed;  // скорость самолета в км/ч. отображается в окне инофрмации о самолете.
+    [HideInInspector] int altitude;  // высота полета самолета в км. отображается в окне инофрмации о самолете.
+    [HideInInspector] string flightName;  // уникальное имя рейса самолета, например "AB1234". отображается в окне инофрмации о самолете.
+    [HideInInspector] string planeModel;  // название модели самолета, например, "Boeing 737". отображается в окне инофрмации о самолете.
+    [HideInInspector] public string destination;  // пункт назначения на английском языке, например, "Saint Petersburg". отображается в окне инофрмации о самолете.
+    [HideInInspector] string startingPlace;  // точка отправления на английском языке, например, "Moscow". отображается в окне инофрмации о самолете.
+    [HideInInspector] string direction;  // состояние самолета на английском языке. например, "horizontal flight", "climbing", "falling", "landing" и т.д. отображается в окне инофрмации о самолете стрелками. 
+    [HideInInspector] public float moveSpeed;  // скорость движения объекта самолета по экрану.
     private FlightInformationGenerator _infoGenerator;  // генератор информации о рейсе. используется для генерации всех вышеперечисленных переменных.
 
     [HideInInspector] public Vector2 screenDirection;  // направление движения по экрану (Vector2.left / Vector2.right)
     private Rigidbody2D _rb;
-    public float deadPoint = 2.9f;  // координата x, на которой самолет вылетает за пределы экрана.
+
+    public float deadPoint = 2.9f;  // координата x, на которой самолет вылетает за пределы экрана. ВРЕМЕННОЕ МАГИЧЕСКОЕ ЧИСЛО. TODO: сделать более универсальным, чтобы не зависело от размера экрана.
 
     public string citiesTxtFileName;  // имя файла с названиями городов на английском языке.
     public string planesTxtFileName;  // имя файла с названиями моделей самолетов
@@ -157,55 +158,47 @@ public class Plane : MonoBehaviour, IPointerClickHandler
         _rb.gravityScale = 0;  // отключение гравитации. необходимо для того, чтобы самолеты не падали.
         _rb.bodyType = RigidbodyType2D.Kinematic;  // необходимо чтобы при столкновении двух коллайдеров они могли проходить сквозь друг друга.
 
-        _selectManager.deSelectObject(this);  // сначала самолет должен быть невыбранным.
+        _selectManager.DeSelectObject(this);  // сначала самолет должен быть невыбранным.
 
-        GenerateFlightInfo();
+        SetFlightInfo();
         moveSpeed = 0.1f;  // установка скорости движения по экрану. 1.5f - временное значение, в будущем будет вычисляться на основе speed.
 
-        SelectPlaneManager.onSelect += OnSelect;
+        SelectPlaneManager.OnSelect += OnSelect;
     }
 
     private void OnSelect(Plane selectedScript)
     {
         if (isSelected) 
         {
-            _selectManager.deSelectObject(this);
+            _selectManager.DeSelectObject(this);
             if (selectedScript == this)
             {
                 TMPFlightInfoUIGroup.ClearAllText();  // очистка всех TMP из UI при снятии выбора с самого себя
-                Debug.Log("All text cleared!");
             }
-        }       
+        }
     }
 
     /// <summary>
-    /// генерирует информацию о самолете с помощью FlightInformationGenerator
+    /// назначает информацию о самолете с помощью FlightInformationGenerator
     /// </summary>
-    private void GenerateFlightInfo()
+    private void SetFlightInfo()
     {
         _infoGenerator = new FlightInformationGenerator(citiesTxtFileName, planesTxtFileName);
-        destination = _infoGenerator.GenerateRandomCity();
+
         flightName = _infoGenerator.GenerateRandomFlightName();
         planeModel = _infoGenerator.GenerateRandomPlaneModel();
+
+        destination = _infoGenerator.GenerateRandomCity();
         do { startingPlace = _infoGenerator.GenerateRandomCity(); } while (destination == startingPlace);  // генерация точки отправления, отличной от пункта назначения
     }
 
     void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log("Click detected!");
-        if (!isSelected)
-        {
-            _selectManager.selectObject(this);
-        }
-        else
-        {
-            _selectManager.deSelectObject(this);
-        }
+        if (isSelected) { _selectManager.DeSelectObject(this); } else { _selectManager.SelectObject(this); }
     }
 
     private void OnDestroy()
     {
-        SelectPlaneManager.onSelect -= OnSelect;
+        SelectPlaneManager.OnSelect -= OnSelect;
     }
-
 }

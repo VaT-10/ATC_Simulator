@@ -76,12 +76,14 @@ namespace Managers
         {
             if (_cachedCamera == null)
             {
-                _cachedCamera = Camera.main;
+                _cachedCamera = Camera.main != null 
+                    ? Camera.main 
+                    : throw new InvalidOperationException("The camera (tag MainCamera) has not been found on the scene. Please check the main camera's tag and try again.");
             }
 
             if (axis == Axis.Z)
             {
-                throw new ArgumentException($"Cannot get screen size along Z axis (how can you see the third dimension in 2D?)!");
+                throw new ArgumentException($"Cannot get screen size along Z axis!");
             }
 
             var screenHeight = _cachedCamera.orthographicSize * 2;
@@ -92,17 +94,18 @@ namespace Managers
 
         /// <summary>
         /// выставляет размер объекта по определенной оси в мировых координатах.
+        /// P.S. также подходит для изменения размера UI-элементов, если они находятся в Canvas 
         /// </summary>
         /// <param name="gameObject">игровой объект, размер которого необходимо поменять.</param>
         /// <param name="axis">ось, по которой необходимо менять размер</param>
-        /// <param name="targetSize">целевой размер объекта</param>
+        /// <param name="targetSize">целевой размер объекта. указывается в мировых координатах при изменении размера GO, либо в ширине RectTransform при изменении размера UI-элемента</param>
         /// <param name="preserveAspect">важный параметр, определяющий, нужно ли сохранять соотношение сторон объекта</param>
         /// <exception cref="ArgumentOutOfRangeException">возбуждается при нулевом scale по оси у объекта</exception>
         public static void SetGOSizeAlongAxis(GameObject gameObject, Axis axis, float targetSize, bool preserveAspect = true)
         {
             if (targetSize < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(targetSize), "Target size must not be negative (do you seriously think I can make an object smaller than it can be?)");
+                throw new ArgumentOutOfRangeException(nameof(targetSize), "Target size must not be negative!");
             }
 
             Vector3 localScale = gameObject.transform.localScale;
@@ -124,7 +127,12 @@ namespace Managers
                 throw new ArgumentOutOfRangeException($"Setting the size failed: the {axis} scale must not be zero!");
             }
 
-            float targetAxisScale = targetSize / (GetGOSizeAlongAxis(gameObject, axis) / curTargetAxisScale);  // получаем scale, при котором ширина станет такой же, как и целевая. один из финальных этапов
+            float curObjectSize = gameObject.GetComponentInParent<Canvas>() != null
+                ? UISizeManager.GetElementSizeAlongAxis(axis, gameObject)
+                : GetGOSizeAlongAxis(gameObject, axis);
+
+            float targetAxisScale = targetSize / (curObjectSize / curTargetAxisScale);  // получаем scale, при котором ширина станет такой же, как и целевая. один из финальных этапов
+                
 
             for (int i = 0; i < scales.Length; i++)
             {
@@ -153,7 +161,10 @@ namespace Managers
         /// <param name="preserveAspect">важный параметр, определяющий, нужно ли сохранять соотношение сторон объекта</param>
         public static void SetGOSizePercent(GameObject gameObject, Axis axis, float targetPercentage, bool preserveAspect = true)
         {
-            var targetSize = (GetScreenSizeAlongAxis(axis) / 100f) * targetPercentage;
+            var targetSize = (gameObject.GetComponentInParent<Canvas>() != null 
+                ? UISizeManager.GetCanvasSizeAlongAxis(axis)
+                : GetScreenSizeAlongAxis(axis)) 
+                / 100f * targetPercentage;
 
             SetGOSizeAlongAxis(gameObject, axis, targetSize, preserveAspect: preserveAspect);  // Нокс, знай, ты лучшая морская свинка в мире
         }
@@ -181,7 +192,7 @@ namespace Managers
 
             if (rendererCount > 1)
             {
-                throw new TooManyComponentsException(typeof(Renderer), gameObject, $"More than one renderer has been found on the {gameObject.name} gameObject: {rendererCount}");
+                throw new TooManyComponentsException(typeof(SpriteRenderer), gameObject, $"More than one renderer has been found on the {gameObject.name} gameObject: {rendererCount}");
             }
 
             _rendererCache[gameObject] = renderers[0];  // кэшируем рендерер для последующего использования

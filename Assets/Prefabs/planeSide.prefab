@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7806604955888298340}
   - component: {fileID: 7982055854587128145}
   - component: {fileID: 7152675006685726788}
+  - component: {fileID: 6330128351646371767}
   m_Layer: 0
   m_Name: planeSide
   m_TagString: Plane
@@ -205,6 +206,28 @@ Rigidbody2D:
   m_SleepingMode: 0
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!95 &6330128351646371767
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4306428732535677615}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 4147587fc36fb4b4f95fb8ff8885029c, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &6023391396844562023
 GameObject:
   m_ObjectHideFlags: 0

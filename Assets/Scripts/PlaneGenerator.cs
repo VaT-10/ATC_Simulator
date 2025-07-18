@@ -19,6 +19,7 @@ public static class PlaneCoordinatesCalculator
     /// <param name="maxSpawnY">самая высокая линяя спавна (в контексте игры, наивысший эшелон)</param>
     public static void CalculateCoordinates(float spawnOffset, float maxSpawnY, float ysCount, float maskEndX)
     {
+        ysCount--;
         var minSpawnY = maxSpawnY - (spawnOffset * ysCount);
         for (float i = maxSpawnY; i >= minSpawnY; i -= spawnOffset)
         {
@@ -132,7 +133,7 @@ public class PlaneGenerator : MonoBehaviour
     /// </summary>
     /// <param name="planeCoordinates">координаты самолета в виде кортежа, где первый элемент - x, а второй - y</param>
     /// <returns>объект созданного самолета</returns>
-    private GameObject InstantiatePlane(Vector3 planeCoordinates) 
+    private GameObject InstantiatePlane(Vector3 planeCoordinates)
     { 
         var plane = Instantiate(_plane, _mapBackground.transform);
         plane.transform.localScale = PLANE_LOCAL_SCALE;

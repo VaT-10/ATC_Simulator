@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Xml.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Animations;
 
 namespace Managers
 {
@@ -21,11 +23,22 @@ namespace Managers
 
         private TMPFlightInfoUIGroup() 
         {
-            flightNameText = GameObject.Find("FlightName").GetComponent<TextMeshProUGUI>();
-            planeModelText = GameObject.Find("PlaneModel").GetComponent<TextMeshProUGUI>();
-            routeText = GameObject.Find("Route").GetComponent<TextMeshProUGUI>();
-            speedText = GameObject.Find("Speed").GetComponent<TextMeshProUGUI>();
-            altitudeText = GameObject.Find("Altitude").GetComponent<TextMeshProUGUI>();
+            var baseExceptionText = "The game object with name {0} does not have the \"TextMeshPro\" component. Please check it and try again.";
+
+            flightNameText = GameObject.Find("FlightName").GetComponent<TextMeshProUGUI>() 
+                ?? throw new MissingComponentException(string.Format(baseExceptionText, "FlightName"));
+
+            planeModelText = GameObject.Find("PlaneModel").GetComponent<TextMeshProUGUI>()
+                ?? throw new MissingComponentException(string.Format(baseExceptionText, "PlaneModel"));
+
+            routeText = GameObject.Find("Route").GetComponent<TextMeshProUGUI>()
+                ?? throw new MissingComponentException(string.Format(baseExceptionText, "Route"));
+
+            speedText = GameObject.Find("Speed").GetComponent<TextMeshProUGUI>()
+                ?? throw new MissingComponentException(string.Format(baseExceptionText, "Speed"));
+
+            altitudeText = GameObject.Find("Altitude").GetComponent<TextMeshProUGUI>()
+                ?? throw new MissingComponentException(string.Format(baseExceptionText, "Altitude"));
         }
 
         /// <returns>все объекты TMP, хранящиеся в классе</returns>
@@ -44,6 +57,11 @@ namespace Managers
                 TMPToClear.text = "";
             }
         }
+
+        private static void ThrowNullGOReferenceException(string name)
+        {
+            ;
+        }
     }
 
     /// <summary>
@@ -52,59 +70,43 @@ namespace Managers
     public static class UISizeManager
     {
         /// <summary>
-        /// функция для установки высоты элемента в процентах от канваса
+        /// получает размер канваса по указанной оси (X или Y).
         /// </summary>
-        /// <param name="percentage">проценты</param>
-        /// <param name="canvas">канвас, относительно которого меняется высота элемента</param>
-        /// <param name="element">сам элемент для изменения размера</param>
-        /// <param name="preserveAspect">важный параметр, определяющий, необходимо ли оставить пропорции</param>
-        public static void SetHeightByCanvasPercent(float percentage, Canvas canvas, GameObject element, bool preserveAspect = true)
+        /// <param name="axis">ось по которой необходимо получить размер канваса</param>
+        /// <returns>размер канваса по указанной оси</returns>
+        public static float GetCanvasSizeAlongAxis(Axis axis)
         {
-            CheckArgs(percentage, canvas, element);
-
-            var canvasRect = canvas.GetComponent<RectTransform>().rect;
-
-            var rectTransform = element.GetComponent<RectTransform>();
-
-            var newHeight = canvasRect.height / 100f * percentage;
-            var aspect = GetRectTransformAspect(rectTransform);
-
-            float newWidth = preserveAspect ? aspect * newHeight : rectTransform.sizeDelta.y;
-
-            if (newWidth > canvasRect.width)
-            {
-                newWidth = canvasRect.width;
-                newHeight = newWidth / aspect;
-            }
-            rectTransform.sizeDelta = new Vector2(newWidth, newHeight);
+            Canvas canvas = UnityEngine.Object.FindFirstObjectByType<Canvas>();
+            
+            return GetElementSizeAlongAxis(axis, canvas.gameObject);
         }
 
         /// <summary>
-        /// функция для установки ширины элемента в процентах от канваса
+        /// получает размер элемента интерфейса по указанной оси (X или Y).
         /// </summary>
-        /// <param name="percentage">проценты</param>
-        /// <param name="canvas">канвас, относительно которого меняется ширина элемента</param>
-        /// <param name="element">сам элемент для изменения размера</param>
-        /// <param name="preserveAspect">важный параметр, определяющий, необходимо ли оставить пропорции</param>
-        public static void SetWidthByCanvasPercent(float percentage, Canvas canvas, GameObject element, bool preserveAspect = true)
+        /// <param name="axis">ось, по которой необходимо получить размер элемента</param>
+        /// <param name="element">элемент, размер которого требуется получить</param>
+        /// <returns>размер элемента интерфейса по указанной оси</returns>
+        /// <exception cref="ArgumentNullException">выбрасывается при передаче null как элемент</exception>
+        /// <exception cref="MissingComponentException">выбрасывается при отсутствии компонента RectTransform </exception>
+        /// <exception cref="ArgumentException"></exception>
+        public static float GetElementSizeAlongAxis(Axis axis, GameObject element)
         {
-            CheckArgs(percentage, canvas, element);
-
-            var canvasRect = canvas.GetComponent<RectTransform>().rect;
-
-            var rectTransform = element.GetComponent<RectTransform>();
-
-            var newWidth = canvasRect.width / 100f * percentage;
-            var aspect = GetRectTransformAspect(rectTransform);
-
-            float newHeight = preserveAspect ? newWidth / aspect : rectTransform.sizeDelta.x;
-
-            if (newHeight > canvasRect.height)
+            if (element == null)
             {
-                newHeight = canvasRect.height;
-                newWidth = newHeight * aspect;
+                throw new ArgumentNullException(nameof(element), "Element cannot be null.");
             }
-            rectTransform.sizeDelta = new Vector2(newWidth, newHeight);
+            if (!element.TryGetComponent<RectTransform>(out var rectTransform))
+            {
+                throw new MissingComponentException($"RectTransform component is missing on the element: {element.name}. Please add it.");
+            }
+            return axis switch
+            {
+                Axis.X => rectTransform.sizeDelta.x,
+                Axis.Y => rectTransform.sizeDelta.y,
+                Axis.Z => throw new ArgumentException("Z axis is not supported for element size."),
+                _ => throw new ArgumentException($"Invalid axis: {axis}. Use X or Y."),
+            };
         }
 
         public static void SetDownCenterAnchors(GameObject element)
@@ -149,8 +151,7 @@ namespace Managers
                 throw new ArgumentNullException(nameof(element), $"Got null instead of element");
             }
 
-            var rt = element.GetComponent<RectTransform>();
-            if (rt == null)
+            if (!element.TryGetComponent<RectTransform>(out var rt))
             {
                 throw new MissingComponentException($"RectTransform component required! Please add it to the \"{element.name}\" element.");
             }

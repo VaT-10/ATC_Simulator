@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# IDE0008: Использование явного типа
+dotnet_diagnostic.IDE0008.severity = silent

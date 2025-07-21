@@ -78,7 +78,7 @@ namespace Managers
         {
             Canvas canvas = UnityEngine.Object.FindFirstObjectByType<Canvas>();
             
-            return GetElementSizeAlongAxis(axis, canvas.gameObject);
+            return GetElementSizeAlongAxis(canvas.gameObject, axis);
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Managers
         /// <exception cref="ArgumentNullException">выбрасывается при передаче null как элемент</exception>
         /// <exception cref="MissingComponentException">выбрасывается при отсутствии компонента RectTransform </exception>
         /// <exception cref="ArgumentException"></exception>
-        public static float GetElementSizeAlongAxis(Axis axis, GameObject element)
+        public static float GetElementSizeAlongAxis(GameObject element, Axis axis)
         {
             if (element == null)
             {

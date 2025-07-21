@@ -1,7 +1,6 @@
 
+using DG.Tweening;
 using System;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 
@@ -12,11 +11,35 @@ namespace Managers
     /// </summary>
     public class SelectPlaneManager
     {
-        private static readonly Lazy<SelectPlaneManager> _instance = new Lazy<SelectPlaneManager>(() => new SelectPlaneManager());  // делаем менеджер синглтоном
+        private static readonly Lazy<SelectPlaneManager> _instance = new(() => new SelectPlaneManager());  // делаем менеджер синглтоном
         public static SelectPlaneManager Instance => _instance.Value;
-
         public static event Action<Plane> OnSelect;
 
+        private readonly CanvasGroup _contentGroup;  // CanvasGroup дл€ управлени€ прозрачностью UI
+        private readonly GameObject _infoPanel;
+
+        private bool _isOnScreen = false;  // флаг, показывающий, отображаетс€ ли окно с информацией о самолете на экране
+
+        private SelectPlaneManager()
+        {
+            _contentGroup = GameObject.FindGameObjectWithTag("ContentGroup").GetComponent<CanvasGroup>();
+            if (_contentGroup == null)
+            {
+                throw new MissingComponentException("The game object with tag 'ContentGroup' does not have the 'CanvasGroup' component. Please check it and try again.");
+            }
+            _contentGroup.alpha = 0;
+
+            _infoPanel = GameObject.FindGameObjectWithTag("InfoPanel");
+            if (_infoPanel == null)
+            {
+                throw new MissingComponentException("The game object with tag 'InfoPanel' does not exist. Please check it and try again.");
+            }
+            UIAnimationManager.YSlideScreen(
+                _infoPanel,
+                UIAnimationManager.YSlides.SlideOut,
+                10.4f
+            );
+        }
 
         /// <summary>
         /// функци€ дл€ выбора самолета. мен€ет переменную isSelected и замен€ет спрайт на selectedPlaneSprite.
@@ -25,10 +48,20 @@ namespace Managers
         public void SelectObject(Plane plane)
         {
             OnSelect?.Invoke(plane);
+            if (!_isOnScreen)
+            {
+                UIAnimationManager.YSlideScreen(
+                    _infoPanel,
+                    UIAnimationManager.YSlides.SlideIn,
+                    0.4f
+                );
+
+                _isOnScreen = true;
+            }
 
             plane.isSelected = true;
 
-            SpriteAnimationManager.DoCrossfade(
+            SpriteAnimationManager.DoCrossFade(
                 plane.spriteRenderer,
                 GetFirstChildSpriteRenderer(plane.gameObject),
                 0.2f
@@ -36,22 +69,44 @@ namespace Managers
 
             var _flightInfoUIGroup = TMPFlightInfoUIGroup.Instance;
 
-            _flightInfoUIGroup.flightNameText.text = plane.flightName;
-            _flightInfoUIGroup.planeModelText.text = plane.planeModel;
-            _flightInfoUIGroup.routeText.text = $"{plane.startingPlace} -\n{plane.destination}";
-            _flightInfoUIGroup.speedText.text = plane.speed.ToString();
-            _flightInfoUIGroup.altitudeText.text = plane.altitude.ToString();
+            _contentGroup.DOFade(0, 0.2f)
+                .OnComplete(() =>
+                {
+                    _flightInfoUIGroup.flightNameText.text = plane.flightName;
+                    _flightInfoUIGroup.planeModelText.text = plane.planeModel;
+                    _flightInfoUIGroup.routeText.text = $"{plane.startingPlace} -\n{plane.destination}";
+                    _flightInfoUIGroup.speedText.text = plane.speed.ToString();
+                    _flightInfoUIGroup.altitudeText.text = plane.altitude.ToString();
+
+                    _contentGroup.DOFade(1, 0.2f);
+                });
+
         }
 
         /// <summary>
         /// снимает выбор с самолета.
         /// </summary>
         /// <param name="plane">скрипт Plane.cs, привз€анный к самолету, с которого нужно сн€ть выбор</param>
-        public void DeSelectObject(Plane plane)
+        public void DeSelectObject(Plane plane, bool self = false)
         {
             plane.isSelected = false;
 
-            _runner.StartCoroutine(_spriteAnimationManager.SpriteSmoothTransition(GetFirstChildSpriteRenderer(plane.gameObject), plane.GetComponent<SpriteRenderer>(), 0.2f));
+            if (self)
+            {
+                UIAnimationManager.YSlideScreen(
+                    _infoPanel, 
+                    UIAnimationManager.YSlides.SlideOut, 
+                    0.4f
+                );
+
+                _isOnScreen = false;
+            }
+
+            SpriteAnimationManager.DoCrossFade(
+                GetFirstChildSpriteRenderer(plane.gameObject),
+                plane.spriteRenderer,
+                0.2f
+            );
 
         }
 

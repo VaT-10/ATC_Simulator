@@ -88,7 +88,7 @@ public class FlightInformationGenerator
     {
         var firstChar = ((char)UnityEngine.Random.Range('A', 'Z' + 1)).ToString();  // генерация первого символа имени рейса самолета
         var secondChar = ((char)UnityEngine.Random.Range('A', 'Z' + 1)).ToString();  // генерация второго символа имени рейса самолета
-        var number = UnityEngine.Random.Range(1000, 10000).ToString();  // генерация номера из имени рейса самолета
+        var number = UnityEngine.Random.Range(100, 10000).ToString();  // генерация номера из имени рейса самолета
 
         #if UNITY_EDITOR
         Debug.Log($"Generated new flight name, first char: {firstChar}, second char: {secondChar}, number: {number}.");
@@ -107,12 +107,12 @@ public class FlightInformationGenerator
 [RequireComponent(typeof(SpriteRenderer), typeof(Rigidbody2D))]
 public class Plane : MonoBehaviour, IPointerClickHandler
 {
-    [HideInInspector] int speed;  // скорость самолета в км/ч. отображается в окне инофрмации о самолете.
-    [HideInInspector] int altitude;  // высота полета самолета в км. отображается в окне инофрмации о самолете.
-    [HideInInspector] string flightName;  // уникальное имя рейса самолета, например "AB1234". отображается в окне инофрмации о самолете.
-    [HideInInspector] string planeModel;  // название модели самолета, например, "Boeing 737". отображается в окне инофрмации о самолете.
+    [HideInInspector] public int speed;  // скорость самолета в км/ч. отображается в окне инофрмации о самолете.
+    [HideInInspector] public int altitude;  // высота полета самолета в км. отображается в окне инофрмации о самолете.
+    [HideInInspector] public string flightName;  // уникальное имя рейса самолета, например "AB1234". отображается в окне инофрмации о самолете.
+    [HideInInspector] public string planeModel;  // название модели самолета, например, "Boeing 737". отображается в окне инофрмации о самолете.
     [HideInInspector] public string destination;  // пункт назначения на английском языке, например, "Saint Petersburg". отображается в окне инофрмации о самолете.
-    [HideInInspector] string startingPlace;  // точка отправления на английском языке, например, "Moscow". отображается в окне инофрмации о самолете.
+    [HideInInspector] public string startingPlace;  // точка отправления на английском языке, например, "Moscow". отображается в окне инофрмации о самолете.
     [HideInInspector] string direction;  // состояние самолета на английском языке. например, "horizontal flight", "climbing", "falling", "landing" и т.д. отображается в окне инофрмации о самолете стрелками. 
     [HideInInspector] public float moveSpeed;  // скорость движения объекта самолета по экрану.
     private FlightInformationGenerator _infoGenerator;  // генератор информации о рейсе. используется для генерации всех вышеперечисленных переменных.
@@ -135,7 +135,8 @@ public class Plane : MonoBehaviour, IPointerClickHandler
     /// </summary>
     public void MovePlane()
     {
-        _rb.MovePosition(_rb.position + screenDirection * moveSpeed * Time.fixedDeltaTime);  // движение самолета через изменение _rb.position
+        Debug.Assert(_rb != null, "WHY THE FUCK IS IT NULL");
+        _rb.MovePosition(_rb.position + moveSpeed * Time.fixedDeltaTime * screenDirection);  // движение самолета через изменение _rb.position
         if ((screenDirection == Vector2.right && transform.position.x > deadPoint) ||
             (screenDirection == Vector2.left && transform.position.x < -deadPoint))  // проверка на выход за пределы экрана
         {
@@ -159,7 +160,7 @@ public class Plane : MonoBehaviour, IPointerClickHandler
         _rb.bodyType = RigidbodyType2D.Kinematic;  // необходимо чтобы при столкновении двух коллайдеров они могли проходить сквозь друг друга.
 
         _selectManager.DeSelectObject(this);  // сначала самолет должен быть невыбранным.
-
+        Debug.Log("Bugabuga");
         SetFlightInfo();
         moveSpeed = 0.1f;  // установка скорости движения по экрану. 1.5f - временное значение, в будущем будет вычисляться на основе speed.
 
@@ -168,14 +169,7 @@ public class Plane : MonoBehaviour, IPointerClickHandler
 
     private void OnSelect(Plane selectedScript)
     {
-        if (isSelected) 
-        {
-            _selectManager.DeSelectObject(this);
-            if (selectedScript == this)
-            {
-                TMPFlightInfoUIGroup.ClearAllText();  // очистка всех TMP из UI при снятии выбора с самого себя
-            }
-        }
+        if (isSelected) _selectManager.DeSelectObject(this);
     }
 
     /// <summary>
@@ -194,7 +188,7 @@ public class Plane : MonoBehaviour, IPointerClickHandler
 
     void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
     {
-        if (isSelected) { _selectManager.DeSelectObject(this); } else { _selectManager.SelectObject(this); }
+        if (isSelected) { _selectManager.DeSelectObject(this, self: true); } else { _selectManager.SelectObject(this); }
     }
 
     private void OnDestroy()

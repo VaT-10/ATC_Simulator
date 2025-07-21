@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Animations;
 
@@ -38,7 +39,7 @@ namespace Managers
     public static class GOSizeManager
     {
         private static Camera _cachedCamera;
-        private static Dictionary<GameObject, SpriteRenderer> _rendererCache = new Dictionary<GameObject, SpriteRenderer>();
+        private static Dictionary<GameObject, SpriteRenderer> _rendererCache = new();
         public enum CacheType
         {
             CameraCache,
@@ -93,7 +94,7 @@ namespace Managers
         }
 
         /// <summary>
-        /// выставляет размер объекта по определенной оси в мировых координатах.
+        /// выставляет размер 2D объекта по определенной оси в мировых координатах.
         /// P.S. также подходит для изменения размера UI-элементов, если они находятся в Canvas 
         /// </summary>
         /// <param name="gameObject">игровой объект, размер которого необходимо поменять.</param>
@@ -101,55 +102,51 @@ namespace Managers
         /// <param name="targetSize">целевой размер объекта. указывается в мировых координатах при изменении размера GO, либо в ширине RectTransform при изменении размера UI-элемента</param>
         /// <param name="preserveAspect">важный параметр, определяющий, нужно ли сохранять соотношение сторон объекта</param>
         /// <exception cref="ArgumentOutOfRangeException">возбуждается при нулевом scale по оси у объекта</exception>
-        public static void SetGOSizeAlongAxis(GameObject gameObject, Axis axis, float targetSize, bool preserveAspect = true)
+        public static void SetGOSizeAlongAxis(GameObject gameObject, Axis axis, float targetSize, bool preserveAspect = true, bool safe = true)
         {
-            if (targetSize < 0)
+            if (targetSize < 0) throw new ArgumentOutOfRangeException(nameof(targetSize), "Target size must not be negative!");
+            if (axis == Axis.Z) throw new ArgumentException("Cannot set size along Z axis!");
+
+            Canvas canvas = gameObject.GetComponentInParent<Canvas>();
+
+            Vector3 localScale = (canvas == null) ? gameObject.transform.localScale : gameObject.GetComponent<RectTransform>().localScale;  // здесь и далее скобки в тернарном операторе добавлены для читаемости
+            var axisScale = (axis == Axis.X) ? localScale.x : localScale.y;
+            var axisSize = (canvas == null) ? GetGOSizeAlongAxis(gameObject, axis) : UISizeManager.GetElementSizeAlongAxis(gameObject, axis);
+
+            var anotherAxisScale = (axis == Axis.X) ? localScale.y : localScale.x;
+
+            if (Mathf.Approximately(axisScale, 0f) || axisScale < 0) throw new ArgumentOutOfRangeException(nameof(axis), "Cannot set size along axis with the scale below or equal to zero!");
+
+            var axisTargetScale = targetSize / (axisSize / axisScale);
+            var anotherAxisTargetScale = preserveAspect ? (anotherAxisScale / axisScale) * axisTargetScale : anotherAxisScale;
+
+            if (safe)
             {
-                throw new ArgumentOutOfRangeException(nameof(targetSize), "Target size must not be negative!");
-            }
+                var anotherAxis = (axis == Axis.X) ? Axis.Y : Axis.X;
 
-            Vector3 localScale = gameObject.transform.localScale;
+                var anotherAxisSize = (canvas == null) ? GetGOSizeAlongAxis(gameObject, anotherAxis) : UISizeManager.GetElementSizeAlongAxis(gameObject, anotherAxis);
+                var targetAxisSize = axisSize * axisTargetScale;
+                var anotherAxisTargetSize = anotherAxisSize * anotherAxisTargetScale;
 
-            Axis[] axes = { Axis.X, Axis.Y, Axis.Z };
-            float[] scales = { localScale.x, localScale.y, localScale.z };
+                var containerAxisSize = (canvas == null) ? GetScreenSizeAlongAxis(axis) : UISizeManager.GetCanvasSizeAlongAxis(axis);
+                var containerAnotherAxisSize = (canvas == null) ? GetScreenSizeAlongAxis(anotherAxis) : UISizeManager.GetCanvasSizeAlongAxis(anotherAxis);
 
-            var curTargetAxisScale = axis switch
-            {
-                Axis.X => localScale.x,
-                Axis.Y => localScale.y,
-                Axis.Z => localScale.z,
-                Axis.None => throw new ArgumentException(nameof(axis)),
-                _ => throw new ArgumentException(nameof(axis)),
-            };
-
-            if (Mathf.Approximately(curTargetAxisScale, 0))
-            {
-                throw new ArgumentOutOfRangeException($"Setting the size failed: the {axis} scale must not be zero!");
-            }
-
-            float curObjectSize = gameObject.GetComponentInParent<Canvas>() != null
-                ? UISizeManager.GetElementSizeAlongAxis(axis, gameObject)
-                : GetGOSizeAlongAxis(gameObject, axis);
-
-            float targetAxisScale = targetSize / (curObjectSize / curTargetAxisScale);  // получаем scale, при котором ширина станет такой же, как и целевая. один из финальных этапов
-                
-
-            for (int i = 0; i < scales.Length; i++)
-            {
-                if (!preserveAspect && axes[i] != axis)
+                if (targetAxisSize > containerAxisSize)
                 {
-                    continue;  // если нет необходимости соблюдать соотношение сторон то необходимо пропускать всё, ось чего не равна той, scale которой необходимо изменить
+                    axisTargetScale = containerAxisSize / (axisSize / axisScale);
+                    anotherAxisTargetScale = preserveAspect ? (anotherAxisScale / axisScale) * axisTargetScale : anotherAxisScale;
                 }
-                if (Mathf.Approximately(scales[i], 0))
+                if (anotherAxisTargetSize > containerAnotherAxisSize)
                 {
-                    Debug.LogWarning($"Cannot preserve aspect: the {axes[i]} scale must not be zero! The final result may differ from the expected one.");
-                    continue;
+                    anotherAxisTargetScale = containerAnotherAxisSize / (anotherAxisSize / anotherAxisScale);
+                    axisTargetScale = preserveAspect ? (axisScale / anotherAxisScale) * anotherAxisTargetScale : axisTargetScale;
                 }
-                var aspect = curTargetAxisScale / scales[i];
-                scales[i] = targetAxisScale / aspect;
             }
 
-            gameObject.transform.localScale = new Vector3(scales[0], scales[1], scales[2]);
+            gameObject.transform.localScale = new Vector3(
+                axis == Axis.X ? axisTargetScale : anotherAxisTargetScale,
+                axis == Axis.Y ? axisTargetScale : anotherAxisTargetScale,
+                gameObject.transform.localScale.z);
         }
 
         /// <summary>
@@ -187,7 +184,7 @@ namespace Managers
 
             if (rendererCount == 0)
             {
-                throw new MissingComponentException($"The Renderer component is missing on the {gameObject.name} gameObject.");
+                throw new MissingComponentException($"The Renderer component is missing on the {gameObject.name} gameObject! Add it, please.");
             }
 
             if (rendererCount > 1)

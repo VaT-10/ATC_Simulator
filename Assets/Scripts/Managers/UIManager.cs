@@ -12,39 +12,47 @@ namespace Managers
     [Serializable]
     public class TMPFlightInfoUIGroup
     {
-        private static readonly Lazy<TMPFlightInfoUIGroup> _instance = new Lazy<TMPFlightInfoUIGroup>(() => new TMPFlightInfoUIGroup());
-        public static TMPFlightInfoUIGroup Instance => _instance.Value;
+        public static TMPFlightInfoUIGroup Instance { get; private set; } = null;
 
-        public TextMeshProUGUI flightNameText;
-        public TextMeshProUGUI planeModelText;
-        public TextMeshProUGUI routeText;
-        public TextMeshProUGUI speedText;
-        public TextMeshProUGUI altitudeText;
+        public TextMeshProUGUI flightNameText { get; private set; }
+        public TextMeshProUGUI PlaneModelText { get; private set; }
+        public TextMeshProUGUI routeText { get; private set; }
+        public TextMeshProUGUI speedText { get; private set; }
+        public TextMeshProUGUI altitudeText { get; private set; }
 
-        private TMPFlightInfoUIGroup() 
+
+        /// <summary>
+        /// инициализирует все переменные синглтона
+        /// </summary>
+        /// <exception cref="MissingComponentException">выбрасывается при отсутствии TMP-компонента у какого-либо объекта</exception>
+        public static void Initialize() 
         {
-            var baseExceptionText = "The game object with name {0} does not have the \"TextMeshPro\" component. Please check it and try again.";
+            if (Instance == null)
+            {
+                Instance = new TMPFlightInfoUIGroup();
+                var baseExceptionText = "The game object with name {0} does not have the \"TextMeshPro\" component. Please check it and try again.";
 
-            flightNameText = GameObject.Find("FlightName").GetComponent<TextMeshProUGUI>() 
-                ?? throw new MissingComponentException(string.Format(baseExceptionText, "FlightName"));
+                Instance.flightNameText = GameObject.Find("FlightName").GetComponent<TextMeshProUGUI>()
+                    ?? throw new MissingComponentException(string.Format(baseExceptionText, "FlightName"));
 
-            planeModelText = GameObject.Find("PlaneModel").GetComponent<TextMeshProUGUI>()
-                ?? throw new MissingComponentException(string.Format(baseExceptionText, "PlaneModel"));
+                Instance.PlaneModelText = GameObject.Find("PlaneModel").GetComponent<TextMeshProUGUI>()
+                    ?? throw new MissingComponentException(string.Format(baseExceptionText, "PlaneModel"));
 
-            routeText = GameObject.Find("Route").GetComponent<TextMeshProUGUI>()
-                ?? throw new MissingComponentException(string.Format(baseExceptionText, "Route"));
+                Instance.routeText = GameObject.Find("Route").GetComponent<TextMeshProUGUI>()
+                    ?? throw new MissingComponentException(string.Format(baseExceptionText, "Route"));
 
-            speedText = GameObject.Find("Speed").GetComponent<TextMeshProUGUI>()
-                ?? throw new MissingComponentException(string.Format(baseExceptionText, "Speed"));
+                Instance.speedText = GameObject.Find("Speed").GetComponent<TextMeshProUGUI>()
+                    ?? throw new MissingComponentException(string.Format(baseExceptionText, "Speed"));
 
-            altitudeText = GameObject.Find("Altitude").GetComponent<TextMeshProUGUI>()
-                ?? throw new MissingComponentException(string.Format(baseExceptionText, "Altitude"));
+                Instance.altitudeText = GameObject.Find("Altitude").GetComponent<TextMeshProUGUI>()
+                    ?? throw new MissingComponentException(string.Format(baseExceptionText, "Altitude"));
+            }
         }
 
         /// <returns>все объекты TMP, хранящиеся в классе</returns>
         public TextMeshProUGUI[] GetAllTMPs()
         {
-            return new TextMeshProUGUI[] { flightNameText, planeModelText, routeText, speedText, altitudeText };
+            return new TextMeshProUGUI[] { flightNameText, PlaneModelText, routeText, speedText, altitudeText };
         }
 
         /// <summary>
@@ -56,11 +64,6 @@ namespace Managers
             {
                 TMPToClear.text = "";
             }
-        }
-
-        private static void ThrowNullGOReferenceException(string name)
-        {
-            ;
         }
     }
 

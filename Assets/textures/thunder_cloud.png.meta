@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: d9fe4085c002564488371ccaedb335d8
+guid: 1be1bc9ca483f3342be896e7731f5a2a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3127158044449118198
-    second: plane-side-selected_0
+      213: -8447621292186362864
+    second: thunder_cloud_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -109,40 +109,27 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: plane-side-selected_0
+      name: thunder_cloud_0
       rect:
         serializedVersion: 2
-        x: 4
-        y: 2
-        width: 226
-        height: 112
+        x: 0
+        y: 0
+        width: 1441
+        height: 985
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 6f715eb4ca5e56b20800000000000000
-      internalID: 3127158044449118198
+      spriteID: e8023633f22b29c40b2f25f7c21f4e89
+      internalID: -8447621292186362864
       vertices: []
       indices: 
       edges: []
@@ -151,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: bc20a45ed9630d641b6af7340b76d7f4
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      plane-side-selected_0: 3127158044449118198
+      thunder_cloud_0: -8447621292186362864
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

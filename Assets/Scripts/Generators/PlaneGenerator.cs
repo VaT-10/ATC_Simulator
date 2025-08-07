@@ -9,8 +9,8 @@ using System.Collections.Generic;
 /// </summary>
 public static class PlaneCoordinatesCalculator
 {
-    private static List<float> _planesYs = new List<float>();
-    private static List<float> _planesXs = new List<float>();
+    public static readonly List<float> _planesYs = new();
+    private static readonly List<float> _planesXs = new();
 
     /// <summary>
     /// вычисляет все возможные координаты спавна самолетов
@@ -36,7 +36,7 @@ public static class PlaneCoordinatesCalculator
     /// <returns>две случайные координаты x и y</returns>
     public static Vector3 GetRandomSpawnPos()
     {
-        float planeX = _planesXs[UnityEngine.Random.Range(0, _planesXs.Count)];
+        float planeX = _planesXs[UnityEngine.Random.Range(0, 2)];
         float planeY = _planesYs[UnityEngine.Random.Range(0, _planesYs.Count)];
 
         return new Vector3(planeX, planeY);
@@ -52,11 +52,11 @@ public class PlaneGenerator : MonoBehaviour
 
     private float _timer;  // таймер, используемый для подсчета времени, прошедшего со спавна предыдущего самолета. увеличивается на Time.deltaTime каждый кадр.
 
-    static readonly Vector3 PLANE_LOCAL_SCALE = new Vector3(0.8f, 0.8f, 0.8f);
-    private const float SPAWN_OFFSET = 0.9f;
-    private const float LOCAL_MAX_SPAWN_Y = 1.8f;
+    private static readonly Vector3 PLANE_LOCAL_SCALE = new(0.11f, 0.11f);
+    private const float SPAWN_OFFSET = 0.839f;
+    private const float LOCAL_MAX_SPAWN_Y = 1.5265f;
     private const int YS_COUNT = 4;
-    private const float LOCAL_MASK_END_X = 3.8f;
+    private const float LOCAL_MASK_END_X = 3.82f;
 
     void Start()
     {
@@ -104,7 +104,7 @@ public class PlaneGenerator : MonoBehaviour
     {
         Vector3 planeCoordinates = PlaneCoordinatesCalculator.GetRandomSpawnPos();
 
-        GameObject generatedPlane = InstantiatePlane(planeCoordinates);
+        GameObject generatedPlane = InstantiatePlane(planeCoordinates.x);
         SetPlaneDirection(generatedPlane);
 
         // taco 🌮
@@ -118,7 +118,7 @@ public class PlaneGenerator : MonoBehaviour
     {
         Vector3 planeScreenDirection = (plane.transform.position.x < 0)? Vector3.right : Vector3.left;
 
-        plane.GetComponent<Plane>().screenDirection = planeScreenDirection;
+        plane.GetComponent<Plane>().direction = planeScreenDirection;
 
         if (planeScreenDirection == Vector3.left)  // при движении влево необходимо развернуть самолет в другую сторону. эта проверка и делает это
         {
@@ -133,12 +133,22 @@ public class PlaneGenerator : MonoBehaviour
     /// </summary>
     /// <param name="planeCoordinates">координаты самолета в виде кортежа, где первый элемент - x, а второй - y</param>
     /// <returns>объект созданного самолета</returns>
-    private GameObject InstantiatePlane(Vector3 planeCoordinates)
+    private GameObject InstantiatePlane(float x)
     { 
         var plane = Instantiate(_plane, _mapBackground.transform);
+
+        var rand = new System.Random();
+        var planeComponent = plane.GetComponent<Plane>();
+
+        var targetAltitude = rand.Choice(planeComponent.flightLevels);
+        var targetY = PlaneCoordinatesCalculator._planesYs[Array.IndexOf(planeComponent.flightLevels, targetAltitude)];
+
+        Debug.Log($"Target altitude:{targetAltitude}. Target Y: {targetY}.\nFlight levels: {{ {string.Join(", ", planeComponent.flightLevels)} }}. Planes Ys: {{ {string.Join(", ", PlaneCoordinatesCalculator._planesYs)} }}");
+
         plane.transform.localScale = PLANE_LOCAL_SCALE;
-        plane.transform.localPosition = planeCoordinates;
-        plane.transform.localRotation = Quaternion.identity;
+        plane.transform.SetLocalPositionAndRotation(new Vector2(x: x, y: targetY), Quaternion.identity);
+
+        planeComponent.SetAltitude(targetAltitude);
 
         return plane;
     }

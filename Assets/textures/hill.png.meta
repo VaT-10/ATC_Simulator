@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 15a28aec8a2a43748bcf500c8d8a47bb
+guid: 214500ac17b1e214d9e92f7641823c84
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6981827254641702772
-    second: cloud_0
+      213: 359788456126783194
+    second: hill_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cloud_0
+      name: hill_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 96
         y: 0
-        width: 1441
-        height: 985
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        width: 1251
+        height: 557
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c88c0fb6a119b1f90800000000000000
-      internalID: -6981827254641702772
+      spriteID: ade19b1d1b93ef400800000000000000
+      internalID: 359788456126783194
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: bebb2368eaef524458bb4081c1c76032
+    spriteID: 2801e00b861ffbf48baff7d92a14ba35
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cloud_0: -6981827254641702772
+      hill_0: 359788456126783194
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

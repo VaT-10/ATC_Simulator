@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 15a28aec8a2a43748bcf500c8d8a47bb
+guid: 2b2847ecc8f27274491363e6b9145347
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6981827254641702772
-    second: cloud_0
+      213: -3369802887499247611
+    second: UI_down_arrow_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cloud_0
+      name: UI_down_arrow_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1441
-        height: 985
+        width: 1018
+        height: 882
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c88c0fb6a119b1f90800000000000000
-      internalID: -6981827254641702772
+      spriteID: 5009587b02e0c31d0800000000000000
+      internalID: -3369802887499247611
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: bebb2368eaef524458bb4081c1c76032
+    spriteID: ba564d9a37324464dbdbd0c8fae77fe0
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cloud_0: -6981827254641702772
+      UI_down_arrow_0: -3369802887499247611
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

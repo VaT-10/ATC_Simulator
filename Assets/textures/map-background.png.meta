@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 15a28aec8a2a43748bcf500c8d8a47bb
+guid: 25fdb53d5fe99214bab9790f1e402ce3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6981827254641702772
-    second: cloud_0
+      213: -8634235032566368848
+    second: map-background_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cloud_0
+      name: map-background_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1441
-        height: 985
+        x: 8
+        y: 9
+        width: 711
+        height: 546
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c88c0fb6a119b1f90800000000000000
-      internalID: -6981827254641702772
+      spriteID: 0b5f5a8ebf80d2880800000000000000
+      internalID: -8634235032566368848
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: bebb2368eaef524458bb4081c1c76032
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cloud_0: -6981827254641702772
+      map-background_0: -8634235032566368848
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

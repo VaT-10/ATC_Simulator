@@ -1,7 +1,7 @@
+using Managers;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Managers;
 
 
 /// <summary>
@@ -13,10 +13,10 @@ public class FileNotFoundOrEmpty : Exception
     public FileNotFoundOrEmpty() { }
     public FileNotFoundOrEmpty(string message) : base(message) { }
 
-    public FileNotFoundOrEmpty(string message,  Exception innerException) : base(message, innerException) { }
+    public FileNotFoundOrEmpty(string message, Exception innerException) : base(message, innerException) { }
 
     protected FileNotFoundOrEmpty(
-        System.Runtime.Serialization.SerializationInfo info, 
+        System.Runtime.Serialization.SerializationInfo info,
         System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 }
 
@@ -25,14 +25,14 @@ public class FileNotFoundOrEmpty : Exception
 /// </summary>
 public class FlightInformationGenerator
 {
-    private string[] _citiesList;
-    private string[] _planesList;
+    private readonly string[] _citiesList;
+    private readonly string[] _planesList;
 
     /// <summary>
     /// загружает файл с городами на английском языке и файл названиями моделей самолетов.
     /// </summary>
     /// <param name="fileName">имя файла</param>
-    public FlightInformationGenerator(string citiesFileName, string planesFileName) 
+    public FlightInformationGenerator(string citiesFileName, string planesFileName)
     {
         _citiesList = GetTextAsset(citiesFileName);
         _planesList = GetTextAsset(planesFileName);  // загрузка всех файлов
@@ -90,10 +90,6 @@ public class FlightInformationGenerator
         var secondChar = ((char)UnityEngine.Random.Range('A', 'Z' + 1)).ToString();  // генерация второго символа имени рейса самолета
         var number = UnityEngine.Random.Range(100, 10000).ToString();  // генерация номера из имени рейса самолета
 
-        #if UNITY_EDITOR
-        Debug.Log($"Generated new flight name, first char: {firstChar}, second char: {secondChar}, number: {number}.");
-        #endif
-
         return firstChar + secondChar + number;
     }
 
@@ -107,38 +103,52 @@ public class FlightInformationGenerator
 [RequireComponent(typeof(SpriteRenderer), typeof(Rigidbody2D))]
 public class Plane : MonoBehaviour, IPointerClickHandler
 {
-    [HideInInspector] public int speed;  // скорость самолета в км/ч. отображается в окне инофрмации о самолете.
-    [HideInInspector] public int altitude;  // высота полета самолета в км. отображается в окне инофрмации о самолете.
-    [HideInInspector] public string flightName;  // уникальное имя рейса самолета, например "AB1234". отображается в окне инофрмации о самолете.
-    [HideInInspector] public string planeModel;  // название модели самолета, например, "Boeing 737". отображается в окне инофрмации о самолете.
-    [HideInInspector] public string destination;  // пункт назначения на английском языке, например, "Saint Petersburg". отображается в окне инофрмации о самолете.
-    [HideInInspector] public string startingPlace;  // точка отправления на английском языке, например, "Moscow". отображается в окне инофрмации о самолете.
-    [HideInInspector] string direction;  // состояние самолета на английском языке. например, "horizontal flight", "climbing", "falling", "landing" и т.д. отображается в окне инофрмации о самолете стрелками. 
-    [HideInInspector] public float moveSpeed;  // скорость движения объекта самолета по экрану.
-    private FlightInformationGenerator _infoGenerator;  // генератор информации о рейсе. используется для генерации всех вышеперечисленных переменных.
+    private const int SPEED_DIVIDER = 35_000;
 
-    [HideInInspector] public Vector2 screenDirection;  // направление движения по экрану (Vector2.left / Vector2.right)
-    private Rigidbody2D _rb;
+    public const int 
+        MIN_SPEED = 780,
+        MAX_SPEED = 900;
 
-    public float deadPoint = 2.9f;  // координата x, на которой самолет вылетает за пределы экрана. ВРЕМЕННОЕ МАГИЧЕСКОЕ ЧИСЛО. TODO: сделать более универсальным, чтобы не зависело от размера экрана.
+    private const float DEAD_POINT = 2.9f;  // пока что магическое число. TODO: сделать более универсальным, чтобы не зависело от размера экрана.
 
-    public string citiesTxtFileName;  // имя файла с названиями городов на английском языке.
-    public string planesTxtFileName;  // имя файла с названиями моделей самолетов
+    //[HideInInspector]
+    public int
+        speed,     // в км/ч
+        altitude;  // в км
+    private float _screenSpeed;  // реальная скорость на экране
 
-    public bool isSelected = false;  // флаг. показывает выбран ли текущий самолет
+    [HideInInspector]
+    public string
+        flightName,
+        planeModel,
+        destination,    // на англ.
+        startingPlace,  // на англ.
+        condition;      // напр. climbing, horizontal flight, stall и т.д.
 
+    [SerializeField]
+    private string
+        citiesTxtFilename,  // города на англ.
+        planesTxtFilename;
+
+    [SerializeField] private Rigidbody2D _rb;
     public SpriteRenderer spriteRenderer;
+
+    [HideInInspector] public Vector2 direction;  // влево/вправо
+    [HideInInspector] public bool isSelected = false;
+
+    private FlightInformationGenerator _infoGenerator;
     private SelectPlaneManager _selectManager;
+
+    public int[] flightLevels = { 40, 30, 20, 5 };
 
     /// <summary>
     /// передвигает самолет по экрану используя _rb.MovePosition. удаляет самолет при выходе за пределы экрана.
     /// </summary>
     public void MovePlane()
     {
-        Debug.Assert(_rb != null, "WHY THE FUCK IS IT NULL");
-        _rb.MovePosition(_rb.position + moveSpeed * Time.fixedDeltaTime * screenDirection);  // движение самолета через изменение _rb.position
-        if ((screenDirection == Vector2.right && transform.position.x > deadPoint) ||
-            (screenDirection == Vector2.left && transform.position.x < -deadPoint))  // проверка на выход за пределы экрана
+        transform.position += (Vector3)(_screenSpeed * Time.fixedDeltaTime * direction);  // движение самолета через изменение _rb.position
+        if ((direction == Vector2.right && transform.position.x > DEAD_POINT) ||
+            (direction == Vector2.left && transform.position.x < -DEAD_POINT))  // проверка на выход за пределы экрана
         {
             Destroy(gameObject);  // удаление объекта при выходе за пределы экрана
         }
@@ -151,18 +161,15 @@ public class Plane : MonoBehaviour, IPointerClickHandler
 
     void Start()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
         _selectManager = SelectPlaneManager.Instance;
-        _rb = GetComponent<Rigidbody2D>();
-        
+
         _rb.interpolation = RigidbodyInterpolation2D.Interpolate;  // установка интерполяции Rigidbody2D. необходима для плавного движения по экрану.
-        _rb.gravityScale = 0;  // отключение гравитации. необходимо для того, чтобы самолеты не падали.
+        _rb.gravityScale = 0;  // отключение гравитации. необходимо для того, чтобы самолеты не падали. ВРЕМЕННО
         _rb.bodyType = RigidbodyType2D.Kinematic;  // необходимо чтобы при столкновении двух коллайдеров они могли проходить сквозь друг друга.
 
         _selectManager.DeSelectObject(this);  // сначала самолет должен быть невыбранным.
-        Debug.Log("Bugabuga");
+
         SetFlightInfo();
-        moveSpeed = 0.1f;  // установка скорости движения по экрану. 1.5f - временное значение, в будущем будет вычисляться на основе speed.
 
         SelectPlaneManager.OnSelect += OnSelect;
     }
@@ -177,14 +184,24 @@ public class Plane : MonoBehaviour, IPointerClickHandler
     /// </summary>
     private void SetFlightInfo()
     {
-        _infoGenerator = new FlightInformationGenerator(citiesTxtFileName, planesTxtFileName);
+        _infoGenerator = new FlightInformationGenerator(citiesTxtFilename, planesTxtFilename);
 
         flightName = _infoGenerator.GenerateRandomFlightName();
         planeModel = _infoGenerator.GenerateRandomPlaneModel();
 
         destination = _infoGenerator.GenerateRandomCity();
         do { startingPlace = _infoGenerator.GenerateRandomCity(); } while (destination == startingPlace);  // генерация точки отправления, отличной от пункта назначения
+
+        SetSpeed(UnityEngine.Random.Range(MIN_SPEED, MAX_SPEED));
     }
+
+    public void SetSpeed(int targetSpeed)
+    {
+        speed = targetSpeed;
+        _screenSpeed = speed / (float)SPEED_DIVIDER;
+    }
+
+    public void SetAltitude(int targetAltitude) => altitude = targetAltitude;
 
     void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
     {

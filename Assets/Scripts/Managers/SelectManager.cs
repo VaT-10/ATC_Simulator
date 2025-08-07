@@ -18,6 +18,7 @@ namespace Managers
         private readonly CanvasGroup _contentGroup;  // CanvasGroup дл€ управлени€ прозрачностью UI
         private readonly GameObject _infoPanel;
 
+        public Plane selectedPlane;
         private bool _isOnScreen = false;  // флаг, показывающий, отображаетс€ ли окно с информацией о самолете на экране
 
         private SelectPlaneManager()
@@ -34,11 +35,15 @@ namespace Managers
             {
                 throw new MissingComponentException("The game object with tag 'InfoPanel' does not exist. Please check it and try again.");
             }
+            
             UIAnimationManager.YSlideScreen(
                 _infoPanel,
                 UIAnimationManager.YSlides.SlideOut,
-                10.4f
+                0f
             );
+            
+
+            selectedPlane = null;
         }
 
         /// <summary>
@@ -60,6 +65,7 @@ namespace Managers
             }
 
             plane.isSelected = true;
+            selectedPlane = plane;
 
             SpriteAnimationManager.DoCrossFade(
                 plane.spriteRenderer,
@@ -73,10 +79,10 @@ namespace Managers
                 .OnComplete(() =>
                 {
                     _flightInfoUIGroup.flightNameText.text = plane.flightName;
-                    _flightInfoUIGroup.planeModelText.text = plane.planeModel;
-                    _flightInfoUIGroup.routeText.text = $"{plane.startingPlace} -\n{plane.destination}";
+                    _flightInfoUIGroup.PlaneModelText.text = plane.planeModel;
+                    _flightInfoUIGroup.routeText.text = $"{plane.startingPlace} Ч\n{plane.destination}";
                     _flightInfoUIGroup.speedText.text = plane.speed.ToString();
-                    _flightInfoUIGroup.altitudeText.text = plane.altitude.ToString();
+                    _flightInfoUIGroup.altitudeText.text = plane.altitude.ToString() + 'K';
 
                     _contentGroup.DOFade(1, 0.2f);
                 });
@@ -100,6 +106,7 @@ namespace Managers
                 );
 
                 _isOnScreen = false;
+                selectedPlane = null;
             }
 
             SpriteAnimationManager.DoCrossFade(

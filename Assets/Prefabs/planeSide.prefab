@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6089336751088494638}
   - component: {fileID: 696039866862061906}
-  - component: {fileID: 7806604955888298340}
-  - component: {fileID: 7982055854587128145}
   - component: {fileID: 7152675006685726788}
+  - component: {fileID: 4069704962235182441}
+  - component: {fileID: 416668215329191535}
   m_Layer: 0
   m_Name: planeSide
   m_TagString: Plane
@@ -80,18 +80,45 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: -3888783407359647789, guid: b964ee672f2e1c84c951e1ee96f1b4f6, type: 3}
+  m_Sprite: {fileID: -5681613791555460825, guid: b485af139e5d87b4597e8cee2acc2d28, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.15, y: 0.98}
+  m_Size: {x: 2.13, y: 1.02}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
---- !u!60 &7806604955888298340
+--- !u!50 &7152675006685726788
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4306428732535677615}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 0
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!60 &4069704962235182441
 PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -128,31 +155,98 @@ PolygonCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.15, y: 0.98}
-    newSize: {x: 2.15, y: 0.98}
+    pivot: {x: 0.5, y: 0.3625}
+    oldSize: {x: 14.49, y: 7.53}
+    newSize: {x: 2.13, y: 1.02}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.475, y: 0.0034161378}
-      - {x: -0.695, y: 0.29}
-      - {x: -0.75715315, y: 0.32999998}
-      - {x: -0.805, y: 0.32999998}
-      - {x: -0.875, y: 0.29999998}
-      - {x: -0.7819565, y: 0.013073292}
-      - {x: -0.864335, y: -0.009131879}
-      - {x: -0.875, y: -0.11}
-      - {x: -0.825, y: -0.16}
-      - {x: -0.615, y: -0.22999999}
-      - {x: 0.74069357, y: -0.22113864}
-      - {x: 0.8528468, y: -0.19}
-      - {x: 0.85727733, y: -0.098861344}
-      - {x: 0.6862629, y: 0.015569324}
+    - - {x: 2.745, y: -0.6796249}
+      - {x: 2.7549999, y: -0.6696249}
+      - {x: 4.365, y: -0.6696249}
+      - {x: 4.495, y: -0.65962493}
+      - {x: 4.6349998, y: -0.63962495}
+      - {x: 4.765, y: -0.6096249}
+      - {x: 4.855, y: -0.57962495}
+      - {x: 5.025, y: -0.49962494}
+      - {x: 5.1549997, y: -0.37962493}
+      - {x: 5.1949997, y: -0.28962493}
+      - {x: 5.1949997, y: -0.13962494}
+      - {x: 5.1749997, y: -0.06962494}
+      - {x: 5.1349998, y: 0.02037506}
+      - {x: 5.055, y: 0.12037506}
+      - {x: 4.9449997, y: 0.20037505}
+      - {x: 4.625, y: 0.38037506}
+      - {x: 4.305, y: 0.53037506}
+      - {x: 4.1749997, y: 0.5803751}
+      - {x: 4.045, y: 0.62037504}
+      - {x: 3.965, y: 0.640375}
+      - {x: 3.875, y: 0.66037506}
+      - {x: 3.7549999, y: 0.68037504}
+      - {x: 3.585, y: 0.700375}
+      - {x: 3.415, y: 0.7103751}
+      - {x: 2.735, y: 0.7103751}
+      - {x: 2.725, y: 0.700375}
+      - {x: 1.415, y: 0.700375}
+      - {x: 1.405, y: 0.69037503}
+      - {x: -0.074999996, y: 0.69037503}
+      - {x: -0.085, y: 0.68037504}
+      - {x: -2.325, y: 0.68037504}
+      - {x: -2.335, y: 0.69037503}
+      - {x: -2.7949998, y: 0.69037503}
+      - {x: -2.8049998, y: 0.700375}
+      - {x: -2.925, y: 0.700375}
+      - {x: -3.075, y: 0.90037507}
+      - {x: -3.185, y: 1.0603751}
+      - {x: -3.335, y: 1.260375}
+      - {x: -3.845, y: 1.950375}
+      - {x: -3.905, y: 2.030375}
+      - {x: -4.105, y: 2.280375}
+      - {x: -4.235, y: 2.440375}
+      - {x: -4.435, y: 2.640375}
+      - {x: -4.495, y: 2.690375}
+      - {x: -4.565, y: 2.720375}
+      - {x: -4.625, y: 2.740375}
+      - {x: -4.6949997, y: 2.750375}
+      - {x: -4.815, y: 2.750375}
+      - {x: -4.915, y: 2.720375}
+      - {x: -5.005, y: 2.620375}
+      - {x: -5.035, y: 2.550375}
+      - {x: -5.055, y: 2.480375}
+      - {x: -5.065, y: 2.410375}
+      - {x: -5.065, y: 2.280375}
+      - {x: -5.045, y: 2.170375}
+      - {x: -4.815, y: 0.960375}
+      - {x: -4.795, y: 0.81037503}
+      - {x: -4.815, y: 0.7103751}
+      - {x: -4.935, y: 0.69037503}
+      - {x: -5.065, y: 0.640375}
+      - {x: -5.125, y: 0.62037504}
+      - {x: -5.2349997, y: 0.49037504}
+      - {x: -5.245, y: 0.46037504}
+      - {x: -5.245, y: 0.34037507}
+      - {x: -5.2349997, y: 0.27037504}
+      - {x: -5.165, y: 0.17037506}
+      - {x: -4.9849997, y: 0.00037506103}
+      - {x: -4.845, y: -0.10962494}
+      - {x: -4.7149997, y: -0.18962494}
+      - {x: -4.455, y: -0.31962493}
+      - {x: -4.145, y: -0.45962492}
+      - {x: -3.7849998, y: -0.5696249}
+      - {x: -3.705, y: -0.57962495}
+      - {x: -3.415, y: -0.63962495}
+      - {x: -3.2849998, y: -0.65962493}
+      - {x: -3.0149999, y: -0.6896249}
+      - {x: -2.825, y: -0.6996249}
+      - {x: -1.9449999, y: -0.6996249}
+      - {x: -1.935, y: -0.6896249}
+      - {x: 0.475, y: -0.6896249}
+      - {x: 0.48499998, y: -0.6796249}
   m_UseDelaunayMesh: 0
---- !u!114 &7982055854587128145
+--- !u!114 &416668215329191535
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -170,40 +264,14 @@ MonoBehaviour:
   planeModel: 
   destination: 
   startingPlace: 
-  moveSpeed: -0.3
-  screenDirection: {x: 0, y: 0}
-  deadPoint: 2.99
-  citiesTxtFileName: txt-cities-russia
-  planesTxtFileName: txt-planes-list
-  isSelected: 0
+  condition: 
+  citiesTxtFilename: txt-cities-russia
+  planesTxtFilename: txt-planes-list
+  _rb: {fileID: 7152675006685726788}
   spriteRenderer: {fileID: 696039866862061906}
---- !u!50 &7152675006685726788
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4306428732535677615}
-  m_BodyType: 1
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 0
-  m_CollisionDetection: 0
-  m_Constraints: 0
+  direction: {x: 0, y: 0}
+  isSelected: 0
+  flightLevels: 280000001e0000001400000005000000
 --- !u!1 &6023391396844562023
 GameObject:
   m_ObjectHideFlags: 0
@@ -280,12 +348,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 3127158044449118198, guid: d9fe4085c002564488371ccaedb335d8, type: 3}
+  m_Sprite: {fileID: 2200241018634476558, guid: 7bf816d8f8a21ee4e906fdb343add6f5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.26, y: 1.12}
+  m_Size: {x: 2.25, y: 1.12}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1

@@ -89,8 +89,6 @@ namespace Managers
 
             var screenHeight = _cachedCamera.orthographicSize * 2;
             return axis == Axis.Y ? screenHeight : screenHeight * (Screen.width / (float)Screen.height);
-
-            // f лягушке.
         }
 
         /// <summary>
@@ -156,14 +154,14 @@ namespace Managers
         /// <param name="axis">ось, по которой необходимо менять размер</param>
         /// <param name="targetPercentage">параметр, определяющий, сколько процентов от экрана по оси Axis будет занимать gameObject</param>
         /// <param name="preserveAspect">важный параметр, определяющий, нужно ли сохранять соотношение сторон объекта</param>
-        public static void SetGOSizePercent(GameObject gameObject, Axis axis, float targetPercentage, bool preserveAspect = true)
+        public static void SetGOSizePercent(GameObject gameObject, Axis axis, float targetPercentage, bool preserveAspect = true, bool safe = true)
         {
             var targetSize = (gameObject.GetComponentInParent<Canvas>() != null 
                 ? UISizeManager.GetCanvasSizeAlongAxis(axis)
                 : GetScreenSizeAlongAxis(axis)) 
                 / 100f * targetPercentage;
 
-            SetGOSizeAlongAxis(gameObject, axis, targetSize, preserveAspect: preserveAspect);  // Нокс, знай, ты лучшая морская свинка в мире
+            SetGOSizeAlongAxis(gameObject, axis, targetSize, preserveAspect: preserveAspect, safe: safe);  // Нокс, знай, ты лучшая морская свинка в мире
         }
 
         /// <summary>
@@ -211,6 +209,3 @@ namespace Managers
     }
 
 }
-
-
-// 🍔 mcdonald's

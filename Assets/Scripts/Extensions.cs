@@ -1,6 +1,7 @@
 using DG.Tweening;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public static class Extensions
@@ -21,4 +22,13 @@ public static class Extensions
     }
 
     public static int ToInt(this bool value) => value? 1 : 0;
+
+    /// <summary>
+    /// возвращает компонент SpriteRenderer у объекта
+    /// </summary>
+    public static SpriteRenderer GetSR(this GameObject go) => go.GetComponent<SpriteRenderer>();
+
+    public static Collider GetCollider(this GameObject go) => go.GetComponent<Collider>();
+
+    public static Collider2D GetCollider2D(this GameObject go) => go.GetComponent<Collider2D>();
 }

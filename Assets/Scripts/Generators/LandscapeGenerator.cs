@@ -22,7 +22,7 @@ public struct Hill
 public class LandscapeGenerator : MonoBehaviour
 {
     [SerializeField]
-    private readonly GameObject
+    private GameObject
         map,
         mountainPrefab,
         hillPrefab,
@@ -33,7 +33,7 @@ public class LandscapeGenerator : MonoBehaviour
     private const float
         MIN_SPAWN_X = -1.85f,
         MAX_SPAWN_X = 3f,
-        Y_POS = 0.2993f;
+        Y_POS = -1.637f;
 
     private static Vector3 GetRandomSpawnPosition()
     {
@@ -202,7 +202,8 @@ public class LandscapeGenerator : MonoBehaviour
         {
             foreach (Hill hill in GetHills())
             {
-                var generatedHill = Instantiate(parent: map.transform, original: hillPrefab, position: GetRandomSpawnPosition(), rotation: Quaternion.identity);
+                var generatedHill = Instantiate(parent: map.transform, original: hillPrefab);
+                generatedHill.transform.SetLocalPositionAndRotation(localPosition: GetRandomSpawnPosition(), localRotation: Quaternion.identity);
                 generatedHill.transform.localScale = hill.scale;
             }
         }

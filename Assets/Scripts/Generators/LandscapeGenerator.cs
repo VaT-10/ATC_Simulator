@@ -38,10 +38,13 @@ public class LandscapeGenerator : MonoBehaviour
     private static Vector3 GetRandomSpawnPosition()
     {
         return new Vector3(
-            x: UnityEngine.Random.Range(MIN_SPAWN_X, MAX_SPAWN_X),
+            x: GetRandomX(),
             y: Y_POS
             );
     }
+    private static bool GetRandomBool() => UnityEngine.Random.value < 0.5f;
+
+    private static float GetRandomX() => UnityEngine.Random.Range(MIN_SPAWN_X, MAX_SPAWN_X);
 
     /// <summary>
     /// Генератор гор.
@@ -190,7 +193,7 @@ public class LandscapeGenerator : MonoBehaviour
 
             MIN_BIG_HILL_SCALE = MIN_X_SCALE + ((MAX_X_SCALE - MIN_X_SCALE) / 2);
 
-        private GameObject hillPrefab, map;
+        private readonly GameObject hillPrefab, map;
         
         public HillGenerator(GameObject hillPrefab, GameObject map)
         {
@@ -226,7 +229,6 @@ public class LandscapeGenerator : MonoBehaviour
 
         private void AddSmallHill(List<Hill> list) => list.Add(new Hill(GetRandomScale(Hill.HillType.SmallHill), Hill.HillType.SmallHill));
         private void AddBigHill(List<Hill> list) => list.Add(new Hill(GetRandomScale(Hill.HillType.BigHill), Hill.HillType.BigHill));
-        private bool GetRandomBool() => UnityEngine.Random.value < 0.5f;
 
         private int GetMountainCount() => LandscapeGenerator.mountainCount;
 
@@ -247,6 +249,56 @@ public class LandscapeGenerator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Генератор холмов.
+    /// 
+    /// ЛОГИКА:
+    ///    - Облака имеют фиксированный scale, указанный в константах.
+    ///    - Облака генерируются на тех же высотах, что и самолеты (используя массив из класса PlaneCoordinatesCalculator скрипта PlaneGenerator.cs)
+    /// </summary>
+    public class CloudsGenerator
+    {
+        private const float SCALE = 0.11f;  // по всем осям
+
+        // диапазон [2; 5] (обе границы включительно)
+        private const int
+            MIN_CLOUDS_COUNT = 2,
+            MAX_CLOUDS_COUNT = 5;
+        private const float THUNDER_CLOUD_CHANCE = 0.25f;
+
+        private static readonly float[] POSSIBLE_YS = PlaneCoordinatesCalculator._planesYs.ToArray();
+        private readonly GameObject cloudPrefab, thunderCloudPrefab, map;
+
+        private readonly System.Random rand = new();
+
+        public CloudsGenerator(GameObject cloudPrefab, GameObject thunderCloudPrefab, GameObject map)
+        {
+            this.cloudPrefab = cloudPrefab;
+            this.thunderCloudPrefab = thunderCloudPrefab;
+            this.map = map;
+        }
+
+        public void GenerateClouds()
+        {
+            var cloudsCount = UnityEngine.Random.Range(MIN_CLOUDS_COUNT, MAX_CLOUDS_COUNT + 1);
+            for (int i = 0; i < cloudsCount; i++)
+            {
+                var targetPrefab = UnityEngine.Random.value < THUNDER_CLOUD_CHANCE ? thunderCloudPrefab : cloudPrefab;
+                var generatedCloud = Instantiate(original: targetPrefab, parent: map.transform);
+
+                generatedCloud.transform.
+                    SetLocalPositionAndRotation(
+                        localPosition: new Vector3(x: GetRandomX(), y: GetRandomCloudY()),
+                        localRotation: Quaternion.identity
+                    );
+                generatedCloud.transform.localScale = new Vector3(SCALE, SCALE);
+            }
+        }
+
+        private float GetRandomCloudY() => rand.Choice(POSSIBLE_YS);
+
+    }
+
     private void Start()
     {
         var mountainGenerator = new MountainGenerator(mountainPrefab, map);
@@ -254,6 +306,9 @@ public class LandscapeGenerator : MonoBehaviour
 
         var hillGenerator = new HillGenerator(hillPrefab, map);
         hillGenerator.GenerateHills();
+
+        var cloudGenerator = new CloudsGenerator(cloudPrefab, thunderCloudPrefab, map);
+        cloudGenerator.GenerateClouds();
         // TODO;
     }
 

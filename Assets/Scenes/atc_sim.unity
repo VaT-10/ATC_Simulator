@@ -419,8 +419,8 @@ MonoBehaviour:
   map: {fileID: 785893289}
   mountainPrefab: {fileID: 700336693595864928, guid: ad1f477b01b92bb4f87746846726c674, type: 3}
   hillPrefab: {fileID: 87204917653258814, guid: ba727074c93727e4991c43d8b65cad6e, type: 3}
-  cloudPrefab: {fileID: 0}
-  thunderCloudPrefab: {fileID: 0}
+  cloudPrefab: {fileID: 1474325147546750868, guid: 5e1ad9362586d58469c0ff003de50890, type: 3}
+  thunderCloudPrefab: {fileID: 7728388932764045965, guid: 5a503f75861d16e458a4f8c2e7223bd8, type: 3}
 --- !u!1 &512118183
 GameObject:
   m_ObjectHideFlags: 0

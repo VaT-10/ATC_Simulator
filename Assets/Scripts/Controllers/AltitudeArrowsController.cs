@@ -13,9 +13,11 @@ namespace Controllers
     {
         private const float
             MIN_ALTITUDE_CHANGE_TIME = 30f,
-            MAX_ALTITUDE_CHANGE_TIME = 45f,
-            ATTACK_ANGLE_CHANGE_TIME = 5f;
-        private static readonly Vector3 ROTATE_ANGLE = new(x: 0f, y: 0f, z: 9.3f);
+            MAX_ALTITUDE_CHANGE_TIME = 45f;
+
+        public const float ATTACK_ANGLE_CHANGE_TIME = 5f;
+        public static readonly Vector3 ROTATE_ANGLE = new(x: 0f, y: 0f, z: 9.3f);
+        [SerializeField] private PlaneConditionManager mngr;
 
         public enum ChangeDirection
         {
@@ -25,7 +27,7 @@ namespace Controllers
 
         private SelectPlaneManager _manager;
         private readonly Dictionary<Plane, (Tweener AltitudeTween,
-                                            Tweener YTween,
+                                            // Tweener YTween,
                                             TweenerCore<Quaternion, Vector3, QuaternionOptions> RotateTween,
                                             Tweener InnerTween,
                                             float StartAltitude,
@@ -34,19 +36,23 @@ namespace Controllers
         private void Start()
         {
             _manager = SelectPlaneManager.Instance;
+            mngr.SetIcon(PlaneConditionManager.IconType.HF);
         }
 
         public void ChangeAltitude(ChangeDirection direction)
         {
             var selectedPlane = _manager.selectedPlane;
-            if (selectedPlane == null) throw new InvalidOperationException("The selected plane is null — cannot continue.");
+            if (selectedPlane == null) throw new InvalidOperationException("The selected plane is null пїЅ cannot continue.");
             var curAltitude = int.Parse(TMPFlightInfoUIGroup.Instance.altitudeText.text.TrimEnd('K'));
 
             var isUp = direction == ChangeDirection.Up;
+            mngr.SetIcon(isUp ? PlaneConditionManager.IconType.Climbing : PlaneConditionManager.IconType.Descent);
+            
+
             var index = Array.IndexOf(selectedPlane.flightLevels, curAltitude);
 
             Debug.Log(index.ToString() + isUp);
-            if ((index == 0 && !isUp) || (index == selectedPlane.flightLevels.Length - 1 && isUp))
+            if ((index == 0 && isUp) || (index == selectedPlane.flightLevels.Length - 1 && !isUp))
             {
                 return;
             }
@@ -76,27 +82,24 @@ namespace Controllers
                     AltitudeTween: DOTween.To(() => selectedPlane.altitude,
                                        altitude => selectedPlane.SetAltitude((int)altitude),
                                        targetAltitude, duration)
-                                   .SetEase(Ease.Linear)  // жертвуем реалистичностью для избежания багов
+                                   .SetEase(Ease.Linear)  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
                                    .OnComplete(() =>
                                    {
                                        _planeTweenPairs[selectedPlane].InnerTween.Play();
                                        _planeTweenPairs[selectedPlane].RotateTween.Kill();
                                        _planeTweenPairs.Remove(selectedPlane);
+                                       mngr.SetIcon(PlaneConditionManager.IconType.HF);
                                    })
                                    .Pause(),
 
-                    YTween: DOTween.To(() => GetPlaneY(selectedPlane),
+                    /* YTween: DOTween.To(() => GetPlaneY(selectedPlane),
                                 y => SetPlaneY(selectedPlane, y),
                                 targetY, duration)
                             .SetEase(Ease.Linear)
-                            .Pause(),
+                            .Pause(), */
 
                     RotateTween: selectedPlane.transform.DORotate(targetAngle, ATTACK_ANGLE_CHANGE_TIME)
-                                                        .OnComplete(() =>
-                                                        {
-                                                            _planeTweenPairs[selectedPlane].AltitudeTween.Play();
-                                                            _planeTweenPairs[selectedPlane].YTween.Play();
-                                                        })
+                                                        .OnComplete(() => _planeTweenPairs[selectedPlane].AltitudeTween.Play())
                                                         .SetEase(Ease.InOutSine)
                                                         .SetAutoKill(false),
 
@@ -110,10 +113,9 @@ namespace Controllers
             }
             else if (_planeTweenPairs[selectedPlane].RotateTween.IsPlaying() && _planeTweenPairs[selectedPlane].StartAltitude == targetAltitude)
             {
-                var (AltitudeTween, YTween, RotateTween, InnerTween, StartAltitude, EndAltitude) = _planeTweenPairs[selectedPlane];
+                var (AltitudeTween, RotateTween, InnerTween, StartAltitude, EndAltitude) = _planeTweenPairs[selectedPlane];
 
                 AltitudeTween.Kill();
-                YTween.Kill();
                 RotateTween.Kill();
 
                 InnerTween.Play();
@@ -121,16 +123,15 @@ namespace Controllers
             }
             else
             {
-                var (AltitudeTween, YTween, RotateTween, InnerTween, StartAltitude, EndAltitude) = _planeTweenPairs[selectedPlane];
+                var (AltitudeTween, RotateTween, InnerTween, StartAltitude, EndAltitude) = _planeTweenPairs[selectedPlane];
 
                 var stepsPerSecond = Math.Abs(EndAltitude - StartAltitude) / AltitudeTween.Duration();
                 var newDuration = Math.Abs(targetAltitude - selectedPlane.altitude) / stepsPerSecond;
 
                 AltitudeTween.ChangeEndValue(targetAltitude, newDuration, true);
-                YTween.ChangeEndValue(targetY, newDuration, true);
                 RotateTween.ChangeEndValue(targetAngle, ATTACK_ANGLE_CHANGE_TIME, true).Restart();
 
-                _planeTweenPairs[selectedPlane] = (AltitudeTween, YTween, RotateTween, InnerTween, selectedPlane.altitude, targetAltitude);
+                _planeTweenPairs[selectedPlane] = (AltitudeTween, RotateTween, InnerTween, selectedPlane.altitude, targetAltitude);
             }
         }
 

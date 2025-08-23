@@ -2,6 +2,7 @@ using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 public static class Extensions
@@ -21,7 +22,7 @@ public static class Extensions
         return new Vector3(x: -vector.x, y: -vector.y, z: -vector.z);
     }
 
-    public static int ToInt(this bool value) => value? 1 : 0;
+    public static int ToInt(this bool value) => value ? 1 : 0;
 
     /// <summary>
     /// возвращает компонент SpriteRenderer у объекта
@@ -31,4 +32,20 @@ public static class Extensions
     public static Collider GetCollider(this GameObject go) => go.GetComponent<Collider>();
 
     public static Collider2D GetCollider2D(this GameObject go) => go.GetComponent<Collider2D>();
+
+    public static void SetLocalY(this Transform transform, float targetY)
+    {
+        var localPos = transform.localPosition;
+        localPos.y = targetY;
+
+        transform.localPosition = localPos;
+    }
+
+    public static void SetLocalX(this Transform transform, float targetX)
+    {
+        var localPos = transform.localPosition;
+        localPos.x = targetX;
+
+        transform.localPosition = localPos;
+    }
 }

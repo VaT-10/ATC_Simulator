@@ -1,5 +1,6 @@
 using Managers;
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -111,11 +112,13 @@ public class Plane : MonoBehaviour, IPointerClickHandler
 
     private const float DEAD_POINT = 2.9f;  // пока что магическое число. TODO: сделать более универсальным, чтобы не зависело от размера экрана.
 
-    //[HideInInspector]
+    [HideInInspector]
     public int
         speed,     // в км/ч
         altitude;  // в км
     private float _screenSpeed;  // реальная скорость на экране
+    private float _lastRotation = float.NaN;
+    private Vector2 _angleDirection;
 
     [HideInInspector]
     public string
@@ -146,12 +149,15 @@ public class Plane : MonoBehaviour, IPointerClickHandler
     /// </summary>
     public void MovePlane()
     {
-        transform.position += (Vector3)(_screenSpeed * Time.fixedDeltaTime * direction);  // движение самолета через изменение _rb.position
-        if ((direction == Vector2.right && transform.position.x > DEAD_POINT) ||
-            (direction == Vector2.left && transform.position.x < -DEAD_POINT))  // проверка на выход за пределы экрана
-        {
-            Destroy(gameObject);  // удаление объекта при выходе за пределы экрана
-        }
+        var z = transform.eulerAngles.z * Mathf.Deg2Rad;
+        if (z != _lastRotation) { _angleDirection = new Vector2(Mathf.Cos(z), Mathf.Sin(z)); Debug.Log("YOOO WE'RE CHANGIN' IT"); };
+        _lastRotation = z;
+
+        Vector2 moveVector = Mathf.Sign(direction.x) * _screenSpeed * Time.fixedDeltaTime * _angleDirection;
+        Debug.Log($"Move Vector: {moveVector} | ScreenSpeed: {_screenSpeed} | DeltaTime: {Time.fixedDeltaTime} | AngleDir: {_angleDirection} | Direction Mtplr: {Mathf.Sign(direction.x)}");
+        transform.localPosition += (Vector3)moveVector;
+
+        if (direction.x * transform.localPosition.x > DEAD_POINT) Destroy(this);
     }
 
     void FixedUpdate()
@@ -212,4 +218,6 @@ public class Plane : MonoBehaviour, IPointerClickHandler
     {
         SelectPlaneManager.OnSelect -= OnSelect;
     }
+
+    public static implicit operator Plane(GameObject go) => go.GetComponent<Plane>();
 }

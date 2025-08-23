@@ -18,31 +18,33 @@ namespace Managers
         private readonly CanvasGroup _contentGroup;  // CanvasGroup для управления прозрачностью UI
         private readonly GameObject _infoPanel;
 
+        private readonly GameObject _planeMirror;
+
         public Plane selectedPlane;
         private bool _isOnScreen = false;  // флаг, показывающий, отображается ли окно с информацией о самолете на экране
 
         private SelectPlaneManager()
         {
-            _contentGroup = GameObject.FindGameObjectWithTag("ContentGroup").GetComponent<CanvasGroup>();
-            if (_contentGroup == null)
-            {
-                throw new MissingComponentException("The game object with tag 'ContentGroup' does not have the 'CanvasGroup' component. Please check it and try again.");
-            }
-            _contentGroup.alpha = 0;
+            _contentGroup = GameObject.FindWithTag("ContentGroup")?.GetComponent<CanvasGroup>() ??
+                throw new MissingComponentException("The game object with tag 'ContentGroup' does not exist " +
+                                                    "or does not have the 'CanvasGroup' component. " +
+                                                    "Please check it and try again.");
 
-            _infoPanel = GameObject.FindGameObjectWithTag("InfoPanel");
-            if (_infoPanel == null)
-            {
+            _infoPanel = GameObject.FindWithTag("InfoPanel") ?? 
                 throw new MissingComponentException("The game object with tag 'InfoPanel' does not exist. Please check it and try again.");
-            }
-            
+
+            _planeMirror = GameObject.FindWithTag("PlaneMirror") ??
+                throw new MissingComponentException("The game object with tag 'PlaneMirror' does not exist. Please check it and try again");
+
+            _contentGroup.alpha = 0;
             UIAnimationManager.YSlideScreen(
                 _infoPanel,
                 UIAnimationManager.YSlides.SlideOut,
                 0f
             );
-            
 
+
+            _planeMirror.SetActive(false);
             selectedPlane = null;
         }
 
@@ -66,6 +68,7 @@ namespace Managers
 
             plane.isSelected = true;
             selectedPlane = plane;
+            _planeMirror.SetActive(true);
 
             SpriteAnimationManager.DoCrossFade(
                 plane.spriteRenderer,
@@ -105,6 +108,7 @@ namespace Managers
                     0.4f
                 );
 
+                _planeMirror.SetActive(false);
                 _isOnScreen = false;
                 selectedPlane = null;
             }

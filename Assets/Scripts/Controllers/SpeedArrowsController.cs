@@ -1,4 +1,4 @@
-using DG.Tweening;
+п»їusing DG.Tweening;
 using Managers;
 using System;
 using System.Collections.Generic;
@@ -8,10 +8,11 @@ namespace Controllers
 {
     public class SpeedArrowsController : MonoBehaviour
     {
-        private const int
-            SPEED_CHANGE = 10,
-            MIN_SPEED_CHANGE_TIME = 5,   // в секундах
-            MAX_SPEED_CHANGE_TIME = 8;  // в секундах
+        public const int
+            MIN_SPEED_CHANGE_TIME = 5,   // пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            MAX_SPEED_CHANGE_TIME = 8,   // пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            SPEED_CHANGE = 10;
+
         private SelectPlaneManager _manager;
         private readonly Dictionary<Plane, (Tween Tween, int EndValue, int StartValue)> _planeTweenPairs = new();
 
@@ -29,9 +30,10 @@ namespace Controllers
         private void ChangeSpeed(ChangeDirection direction)
         {
             var isUp = direction == ChangeDirection.Up;
+            
 
             var selectedPlane = _manager.selectedPlane;
-            if (selectedPlane == null) throw new InvalidOperationException("The selected plane is null — cannot continue.");
+            if (selectedPlane == null) throw new InvalidOperationException("The selected plane is null пїЅ cannot continue.");
 
             var curSpeed = int.Parse(TMPFlightInfoUIGroup.Instance.speedText.text);
             var targetSpeed = Math.Clamp(curSpeed + (isUp ? SPEED_CHANGE : -SPEED_CHANGE), Plane.MIN_SPEED, Plane.MAX_SPEED);
@@ -39,7 +41,7 @@ namespace Controllers
 
             if (!_planeTweenPairs.ContainsKey(selectedPlane))
             {
-                var duration = UnityEngine.Random.Range(MIN_SPEED_CHANGE_TIME, MAX_SPEED_CHANGE_TIME);
+                var duration = GetChangeTime();
 
                 _planeTweenPairs[selectedPlane] = (Tween:
                     DOTween.To(() => selectedPlane.speed, selectedPlane.SetSpeed, targetSpeed, duration)
@@ -51,9 +53,9 @@ namespace Controllers
                 var value = _planeTweenPairs[selectedPlane];
                 var animatedPlaneTweener = value.Tween as Tweener;
 
-                // ПРИМЕР: было от 10 до 20 за 5 секунд. сейчас мы на 15. нужно поменять конец на 35
-                var stepsPerSecond = Math.Abs(value.EndValue - value.StartValue) / animatedPlaneTweener.Duration();  // ПРИМЕР: (20 - 10) / 5 = 10 / 5 = 2 шага в секунду
-                var newDuration = Math.Abs(targetSpeed - selectedPlane.speed) / stepsPerSecond; // ПРИМЕР: (35 - 15) / 2 = 20 (шагов) / 2 = 10 секунд еще идти анимации
+                // пїЅпїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅ пїЅпїЅ 10 пїЅпїЅ 20 пїЅпїЅ 5 пїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ 15. пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ 35
+                var stepsPerSecond = Math.Abs(value.EndValue - value.StartValue) / animatedPlaneTweener.Duration();  // пїЅпїЅпїЅпїЅпїЅпїЅ: (20 - 10) / 5 = 10 / 5 = 2 пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+                var newDuration = Math.Abs(targetSpeed - selectedPlane.speed) / stepsPerSecond; // пїЅпїЅпїЅпїЅпїЅпїЅ: (35 - 15) / 2 = 20 (пїЅпїЅпїЅпїЅпїЅ) / 2 = 10 пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
                 animatedPlaneTweener.ChangeEndValue(targetSpeed, newDuration: newDuration, snapStartValue: true);
                 _planeTweenPairs[selectedPlane] = (value.Tween, EndValue: targetSpeed, StartValue: selectedPlane.speed);
@@ -62,5 +64,7 @@ namespace Controllers
 
         public void SpeedUp() => ChangeSpeed(ChangeDirection.Up);
         public void SpeedDown() => ChangeSpeed(ChangeDirection.Down);
+
+        public static float GetChangeTime() => UnityEngine.Random.Range(MIN_SPEED_CHANGE_TIME, MAX_SPEED_CHANGE_TIME);
     }
 }

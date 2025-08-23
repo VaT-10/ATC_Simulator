@@ -9,6 +9,7 @@ TagManager:
   - PlaneNameText
   - ContentGroup
   - InfoPanel
+  - PlaneMirror
   layers:
   - Default
   - TransparentFX

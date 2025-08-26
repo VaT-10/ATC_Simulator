@@ -125,8 +125,8 @@ public class Plane : MonoBehaviour, IPointerClickHandler
         flightName,
         planeModel,
         destination,    // на англ.
-        startingPlace,  // на англ.
-        condition;      // напр. climbing, horizontal flight, stall и т.д.
+        startingPlace;  // на англ.
+    public PlaneConditionManager.Condition condition;      // напр. climbing, horizontal flight, stall и т.д.
 
     [SerializeField]
     private string

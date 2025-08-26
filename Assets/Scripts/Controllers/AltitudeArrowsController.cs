@@ -36,7 +36,7 @@ namespace Controllers
         private void Start()
         {
             _manager = SelectPlaneManager.Instance;
-            mngr.SetIcon(PlaneConditionManager.IconType.HF);
+            mngr.SetIcon(PlaneConditionManager.Condition.HF);
         }
 
         public void ChangeAltitude(ChangeDirection direction)
@@ -46,7 +46,7 @@ namespace Controllers
             var curAltitude = int.Parse(TMPFlightInfoUIGroup.Instance.altitudeText.text.TrimEnd('K'));
 
             var isUp = direction == ChangeDirection.Up;
-            mngr.SetIcon(isUp ? PlaneConditionManager.IconType.Climbing : PlaneConditionManager.IconType.Descent);
+            mngr.SetIcon(isUp ? PlaneConditionManager.Condition.Climbing : PlaneConditionManager.Condition.Descent);
             
 
             var index = Array.IndexOf(selectedPlane.flightLevels, curAltitude);
@@ -88,7 +88,7 @@ namespace Controllers
                                        _planeTweenPairs[selectedPlane].InnerTween.Play();
                                        _planeTweenPairs[selectedPlane].RotateTween.Kill();
                                        _planeTweenPairs.Remove(selectedPlane);
-                                       mngr.SetIcon(PlaneConditionManager.IconType.HF);
+                                       mngr.SetIcon(PlaneConditionManager.Condition.HF);
                                    })
                                    .Pause(),
 

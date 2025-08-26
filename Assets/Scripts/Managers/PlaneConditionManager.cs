@@ -40,7 +40,7 @@ public class PlaneConditionManager : MonoBehaviour
         tailspinArrow;
     [SerializeField] private Image iconImage;
 
-    public enum IconType
+    public enum Condition
     {
         Climbing,
         Descent,
@@ -130,7 +130,7 @@ public class PlaneConditionManager : MonoBehaviour
     /// <returns>Tweener ��������� �������</returns>
     public static Tweener ChangePitch(float angle, Plane planeComponent)
     {
-        planeComponent.DOKill();
+        planeComponent.transform.DOKill();
         var curAngle = planeComponent.transform.localRotation;
         var targetAngle = new Vector3(x: curAngle.x, y: curAngle.y, z: angle);
 
@@ -183,16 +183,16 @@ public class PlaneConditionManager : MonoBehaviour
 
     private float GetFallingTime(Plane planeComponent) => TT_FALLING_TIME * (planeComponent.altitude / 10f);
 
-    public void SetIcon(IconType iconType)
+    public void SetIcon(Condition iconType)
     {
         switch (iconType)
         {
-            case IconType.Climbing: iconImage.sprite = climbingArrow; break;
-            case IconType.Descent: iconImage.sprite = descentArrow; break;
-            case IconType.Diving: iconImage.sprite = divingArrow; break;
-            case IconType.HF: iconImage.sprite = HFArrow; break;
-            case IconType.Stall: iconImage.sprite = stallArrow; break;
-            case IconType.Tailspin: iconImage.sprite = tailspinArrow; break;
+            case Condition.Climbing: iconImage.sprite = climbingArrow; break;
+            case Condition.Descent: iconImage.sprite = descentArrow; break;
+            case Condition.Diving: iconImage.sprite = divingArrow; break;
+            case Condition.HF: iconImage.sprite = HFArrow; break;
+            case Condition.Stall: iconImage.sprite = stallArrow; break;
+            case Condition.Tailspin: iconImage.sprite = tailspinArrow; break;
             default: break;
         }
     }

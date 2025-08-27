@@ -24,11 +24,12 @@ public class PlaneConditionManager : MonoBehaviour
         TT_FALLING_TIME = 15f,  // � ��������. TT � Ten Thousand
 
         // �����
-        STALL_CHANCE = 0.1f,      // 10%
-        TAILSPIN_CHANCE = 0.1f,   // 10% ������ ����������. 1%
-        DIVING_CHANCE = 0.07f;    // 7%
+        STALL_CHANCE = 0.05f,      // 5%
+        TAILSPIN_CHANCE = 0.01f,   // 1%
+        DIVING_CHANCE = 0.04f;     // 4%
 
     public const float ANGLE_CHANGE = 37f;  // относится к группе общих настроек
+    private static readonly float PITCH_ASPECT = AltitudeArrowsController.ATTACK_ANGLE_CHANGE_TIME / AltitudeArrowsController.ROTATE_ANGLE.z;  // не константа т.к. ROTATE_ANGLE это Vector3
 
     [SerializeField]
     private Sprite
@@ -39,6 +40,8 @@ public class PlaneConditionManager : MonoBehaviour
         stallArrow,
         tailspinArrow;
     [SerializeField] private Image iconImage;
+
+    private static readonly Dictionary<Plane, Sequence> _stallingPlanes;
 
     public enum Condition
     {
@@ -94,13 +97,26 @@ public class PlaneConditionManager : MonoBehaviour
     private void StartStall(GameObject stallingPlane)
     {
         var planeComponent = stallingPlane.GetComponent<Plane>();  // ��������
+        planeComponent.condition = Condition.Stall;
 
         ChangePitch(AltitudeArrowsController.ROTATE_ANGLE.z + ANGLE_CHANGE, planeComponent);  // ��������� ������� (���� �����)
-        SetCriticalSpeed(planeComponent, CriticalSpeed.Min).OnComplete(() =>                            // ������� �������� ��-�� ������� ���� ������������
-        StartFalling(planeComponent));                                                                  // ������� ������� �������� � �������� ������.
+        SetSpeed(planeComponent, (int)CriticalSpeed.Min).OnComplete(() =>                     // ������� �������� ��-�� ������� ���� ������������
+        _stallingPlanes[planeComponent] = StartFalling(planeComponent));                      // ������� ������� �������� � �������� ������.
 
+        SetIcon(Condition.Stall);
         Debug.Log("��� ������� ������ �����");
     }
+
+    public void ExitStall(GameObject exitingPlane)
+    {
+        var planeComponent = exitingPlane.GetComponent<Plane>();
+        _stallingPlanes[planeComponent].Kill();
+        _stallingPlanes.Remove(planeComponent);
+
+        SetSpeed(planeComponent, Plane.MIN_SPEED);
+        planeComponent.condition = Condition.HF;
+        SetIcon(Condition.HF);
+    } 
 
     private void StartTailspin(GameObject tailspinningPlane) { /* TODO */ }
 
@@ -112,12 +128,15 @@ public class PlaneConditionManager : MonoBehaviour
     {
         // ��� �������� ��������� �����. �����������.
         var planeComponent = divingPlane.GetComponent<Plane>();  // ��������
+        planeComponent.condition = Condition.Diving;
 
         ChangePitch(-ANGLE_CHANGE, planeComponent).OnComplete(() =>                              // ������ ������, ��������� ������� ����� � �����
         {
-            SetCriticalSpeed(planeComponent, CriticalSpeed.Max, GetFallingTime(planeComponent));  // ������������� �������� ���� ������������. ����� �������� ������������� ��� ����� �������
+            SetSpeed(planeComponent, (int)CriticalSpeed.Max, GetFallingTime(planeComponent));  // ������������� �������� ���� ������������. ����� �������� ������������� ��� ����� �������
             StartFalling(planeComponent);                                                         // ������� ������
         });
+        planeComponent.condition = Condition.Diving;
+        SetIcon(Condition.Diving);
 
         Debug.Log("��� ������� ������ ����� ���� �����");
     }
@@ -131,12 +150,14 @@ public class PlaneConditionManager : MonoBehaviour
     public static Tweener ChangePitch(float angle, Plane planeComponent)
     {
         planeComponent.transform.DOKill();
-        var curAngle = planeComponent.transform.localRotation;
+        var curAngle = planeComponent.transform.localEulerAngles;
         var targetAngle = new Vector3(x: curAngle.x, y: curAngle.y, z: angle);
 
+        var deltaZ = Mathf.DeltaAngle(curAngle.z, angle);
+
         if (planeComponent.direction == Vector2.left) targetAngle = targetAngle.Negative();
-        var targetDuration = (AltitudeArrowsController.ATTACK_ANGLE_CHANGE_TIME / AltitudeArrowsController.ROTATE_ANGLE.z) * Mathf.Abs(curAngle.z - targetAngle.z);  // ������ ��� ����������
-        Debug.Log($"({AltitudeArrowsController.ATTACK_ANGLE_CHANGE_TIME} / {AltitudeArrowsController.ROTATE_ANGLE.z}) * {Mathf.Abs(curAngle.z - targetAngle.z)} = {(AltitudeArrowsController.ATTACK_ANGLE_CHANGE_TIME / AltitudeArrowsController.ROTATE_ANGLE.z)} * {Mathf.Abs(curAngle.z - targetAngle.z)} = {targetDuration}");
+        var targetDuration = PITCH_ASPECT * Mathf.Abs(deltaZ);  // ������ ��� ����������
+        
         return planeComponent.transform.DORotate(targetAngle, targetDuration);
     }
 
@@ -165,18 +186,16 @@ public class PlaneConditionManager : MonoBehaviour
     /// </summary>
     /// <param name="planeComponent">������� ��� ��������� ��������</param>
     /// <returns>Tweener ��������� ��������</returns>
-    private Tweener SetCriticalSpeed(Plane planeComponent, CriticalSpeed criticalSpeedType, float? customDuration = null)
+    private Tweener SetSpeed(Plane planeComponent, int speed, float? customDuration = null)
     {
-        var criticalSpeed = (int)criticalSpeedType;
-
         // MAX_SPEED_CHANGE_TIME � �� SPEED_CHANGE ��/�. ����� ������� ������� ����� ������ �� criticalSpeed � ����� �� ��� � �� �� ����������/���������� ���� ��� ���������� �������
-        var speedUnits = Mathf.Abs(criticalSpeed - planeComponent.speed) / SpeedArrowsController.SPEED_CHANGE;
+        var speedUnits = Mathf.Abs(speed - planeComponent.speed) / SpeedArrowsController.SPEED_CHANGE;
         var targetDuration = customDuration ?? SpeedArrowsController.GetChangeTime() * speedUnits / 2;
 
         return DOTween.To(
             getter: () => planeComponent.speed,
             setter: planeComponent.SetSpeed,
-            endValue: criticalSpeed,
+            endValue: speed,
             duration: targetDuration
         );
     }

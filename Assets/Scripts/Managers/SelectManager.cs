@@ -1,6 +1,7 @@
 
 using DG.Tweening;
 using System;
+using TMPro;
 using UnityEngine;
 
 
@@ -9,42 +10,34 @@ namespace Managers
     /// <summary>
     /// менеджер дл€ удобного управлени€ выбором самолетов.
     /// </summary>
-    public class SelectPlaneManager
+    public class SelectPlaneManager : MonoBehaviour
     {
-        private static readonly Lazy<SelectPlaneManager> _instance = new(() => new SelectPlaneManager());  // делаем менеджер синглтоном
-        public static SelectPlaneManager Instance => _instance.Value;
         public static event Action<Plane> OnSelect;
 
-        private readonly CanvasGroup _contentGroup;  // CanvasGroup дл€ управлени€ прозрачностью UI
-        private readonly GameObject _infoPanel;
+        [Header("UI References")]
+        [SerializeField] private CanvasGroup _infoPanelCanvasGroup;
+        [SerializeField] private GameObject _infoPanel;
+        [SerializeField] private GameObject _planeMirror;
+        [SerializeField] private GameObject _pitchContent;
+        [SerializeField] private TextMeshProUGUI _pitchContentInfoText;
 
-        private readonly GameObject _planeMirror;
+        [HideInInspector] public Plane selectedPlane;
+        private bool _isOnScreen = false;
 
-        public Plane selectedPlane;
-        private bool _isOnScreen = false;  // флаг, показывающий, отображаетс€ ли окно с информацией о самолете на экране
-
-        private SelectPlaneManager()
+        private void Awake()
         {
-            _contentGroup = GameObject.FindWithTag("ContentGroup")?.GetComponent<CanvasGroup>() ??
-                throw new MissingComponentException("The game object with tag 'ContentGroup' does not exist " +
-                                                    "or does not have the 'CanvasGroup' component. " +
-                                                    "Please check it and try again.");
+            // sanity checks
+            if (!_infoPanelCanvasGroup) Debug.LogError("ContentGroup not assigned in inspector!");
+            if (!_infoPanel) Debug.LogError("InfoPanel not assigned in inspector!");
+            if (!_planeMirror) Debug.LogError("PlaneMirror not assigned in inspector!");
+            if (!_pitchContent) Debug.LogError("PitchContent not assigned in inspector!");
 
-            _infoPanel = GameObject.FindWithTag("InfoPanel") ?? 
-                throw new MissingComponentException("The game object with tag 'InfoPanel' does not exist. Please check it and try again.");
-
-            _planeMirror = GameObject.FindWithTag("PlaneMirror") ??
-                throw new MissingComponentException("The game object with tag 'PlaneMirror' does not exist. Please check it and try again");
-
-            _contentGroup.alpha = 0;
-            UIAnimationManager.YSlideScreen(
-                _infoPanel,
-                UIAnimationManager.YSlides.SlideOut,
-                0f
-            );
-
+            // initial UI state
+            _infoPanelCanvasGroup.alpha = 0;
+            UIAnimationManager.YSlideScreen(_infoPanel, UIAnimationManager.YSlides.SlideOut, 0f);
 
             _planeMirror.SetActive(false);
+            _pitchContent.SetActive(false);
             selectedPlane = null;
         }
 
@@ -70,24 +63,26 @@ namespace Managers
             selectedPlane = plane;
             _planeMirror.SetActive(true);
 
+            _pitchContentInfoText.text = $"{plane.planeModel} Х {plane.flightName}";
+
             SpriteAnimationManager.DoCrossFade(
                 plane.spriteRenderer,
                 GetFirstChildSpriteRenderer(plane.gameObject),
                 0.2f
             );
 
-            var _flightInfoUIGroup = TMPFlightInfoUIGroup.Instance;
+            var _flightInfoUIGroup = DataLinks.Instance;
 
-            _contentGroup.DOFade(0, 0.2f)
+            _infoPanelCanvasGroup.DOFade(0, 0.2f)
                 .OnComplete(() =>
                 {
-                    _flightInfoUIGroup.flightNameText.text = plane.flightName;
+                    _flightInfoUIGroup.FlightNameText.text = plane.flightName;
                     _flightInfoUIGroup.PlaneModelText.text = plane.planeModel;
-                    _flightInfoUIGroup.routeText.text = $"{plane.startingPlace} Ч\n{plane.destination}";
-                    _flightInfoUIGroup.speedText.text = plane.speed.ToString();
-                    _flightInfoUIGroup.altitudeText.text = plane.altitude.ToString() + 'K';
+                    _flightInfoUIGroup.RouteText.text = $"{plane.startingPlace} Ч\n{plane.destination}";
+                    _flightInfoUIGroup.SpeedText.text = plane.speed.ToString();
+                    _flightInfoUIGroup.AltitudeText.text = plane.altitude.ToString() + 'K';
 
-                    _contentGroup.DOFade(1, 0.2f);
+                    _infoPanelCanvasGroup.DOFade(1, 0.2f);
                 });
 
         }
@@ -121,9 +116,6 @@ namespace Managers
 
         }
 
-        private static SpriteRenderer GetFirstChildSpriteRenderer(GameObject obj)
-        {
-            return obj.transform.GetChild(0).GetComponent<SpriteRenderer>();
-        }
+        private static SpriteRenderer GetFirstChildSpriteRenderer(GameObject obj) => obj.transform.GetChild(0).GetComponent<SpriteRenderer>();
     }
 }

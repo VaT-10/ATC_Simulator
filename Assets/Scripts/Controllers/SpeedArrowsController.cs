@@ -13,7 +13,7 @@ namespace Controllers
             MAX_SPEED_CHANGE_TIME = 8,   // � ��������
             SPEED_CHANGE = 10;
 
-        private SelectPlaneManager _manager;
+        [SerializeField] private SelectPlaneManager _manager;
         private readonly Dictionary<Plane, (Tween Tween, int EndValue, int StartValue)> _planeTweenPairs = new();
 
         private enum ChangeDirection
@@ -24,7 +24,6 @@ namespace Controllers
 
         private void Start()
         {
-            _manager = SelectPlaneManager.Instance;
             _planeTweenPairs.Clear();
         }
         private void ChangeSpeed(ChangeDirection direction)
@@ -35,9 +34,9 @@ namespace Controllers
             var selectedPlane = _manager.selectedPlane;
             if (selectedPlane == null) throw new InvalidOperationException("The selected plane is null � cannot continue.");
 
-            var curSpeed = int.Parse(TMPFlightInfoUIGroup.Instance.speedText.text);
+            var curSpeed = int.Parse(DataLinks.Instance.SpeedText.text);
             var targetSpeed = Math.Clamp(curSpeed + (isUp ? SPEED_CHANGE : -SPEED_CHANGE), Plane.MIN_SPEED, Plane.MAX_SPEED);
-            TMPFlightInfoUIGroup.Instance.speedText.text = targetSpeed.ToString();
+            DataLinks.Instance.SpeedText.text = targetSpeed.ToString();
 
             if (!_planeTweenPairs.ContainsKey(selectedPlane))
             {

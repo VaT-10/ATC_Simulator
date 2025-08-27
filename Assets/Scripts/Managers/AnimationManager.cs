@@ -18,6 +18,12 @@ namespace Managers
             spriteToAppear.DOFade(1f, duration);
         }
 
+        public static void Blink(SpriteRenderer sprite, float duration)
+        {
+            var halfDuration = duration / 2;
+            sprite.DOFade(0, halfDuration).OnComplete(() => { sprite.DOFade(1, halfDuration); });
+        }
+
         // класс будет расширяться
     }
 

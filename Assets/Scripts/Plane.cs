@@ -106,11 +106,11 @@ public class Plane : MonoBehaviour, IPointerClickHandler
 {
     private const int SPEED_DIVIDER = 35_000;
 
-    public const int 
+    public const int
         MIN_SPEED = 780,
         MAX_SPEED = 900;
 
-    private const float DEAD_POINT = 2.9f;  // пока что магическое число. TODO: сделать более универсальным, чтобы не зависело от размера экрана.
+    private const float DEAD_POINT = 2.9f;
 
     [HideInInspector]
     public int
@@ -126,7 +126,7 @@ public class Plane : MonoBehaviour, IPointerClickHandler
         planeModel,
         destination,    // на англ.
         startingPlace;  // на англ.
-    public PlaneConditionManager.Condition condition;      // напр. climbing, horizontal flight, stall и т.д.
+    public PlaneConditionManager.Condition condition;  // напр. climbing, horizontal flight, stall и т.д.
 
     [SerializeField]
     private string
@@ -141,6 +141,7 @@ public class Plane : MonoBehaviour, IPointerClickHandler
 
     private FlightInformationGenerator _infoGenerator;
     private SelectPlaneManager _selectManager;
+    private PlaneConditionManager _conditionManager;
 
     public int[] flightLevels = { 40, 30, 20, 5 };
 
@@ -150,11 +151,18 @@ public class Plane : MonoBehaviour, IPointerClickHandler
     public void MovePlane()
     {
         var z = transform.eulerAngles.z * Mathf.Deg2Rad;
-        if (z != _lastRotation) { _angleDirection = new Vector2(Mathf.Cos(z), Mathf.Sin(z)); Debug.Log("YOOO WE'RE CHANGIN' IT"); };
+        if (z != _lastRotation)
+        {
+            _angleDirection = new Vector2(Mathf.Cos(z), Mathf.Sin(z));
+
+            if (condition == PlaneConditionManager.Condition.Stall && (transform.eulerAngles.z * direction.x) < 0) _conditionManager.ExitStall(gameObject);
+        };
         _lastRotation = z;
 
+        if (condition == PlaneConditionManager.Condition.Diving || condition == PlaneConditionManager.Condition.Stall || condition == PlaneConditionManager.Condition.Tailspin) return;
+
         Vector2 moveVector = Mathf.Sign(direction.x) * _screenSpeed * Time.fixedDeltaTime * _angleDirection;
-        Debug.Log($"Move Vector: {moveVector} | ScreenSpeed: {_screenSpeed} | DeltaTime: {Time.fixedDeltaTime} | AngleDir: {_angleDirection} | Direction Mtplr: {Mathf.Sign(direction.x)}");
+        //Debug.Log($"Move Vector: {moveVector} | ScreenSpeed: {_screenSpeed} | DeltaTime: {Time.fixedDeltaTime} | AngleDir: {_angleDirection} | Direction Mtplr: {Mathf.Sign(direction.x)}");
         transform.localPosition += (Vector3)moveVector;
 
         if (direction.x * transform.localPosition.x > DEAD_POINT) Destroy(this);
@@ -167,8 +175,8 @@ public class Plane : MonoBehaviour, IPointerClickHandler
 
     void Start()
     {
-        _selectManager = SelectPlaneManager.Instance;
-
+        _selectManager = DataLinks.Instance.SPM;
+        _conditionManager = DataLinks.Instance.PCM;
         _rb.interpolation = RigidbodyInterpolation2D.Interpolate;  // установка интерпол€ции Rigidbody2D. необходима дл€ плавного движени€ по экрану.
         _rb.gravityScale = 0;  // отключение гравитации. необходимо дл€ того, чтобы самолеты не падали. ¬–≈ћ≈ЌЌќ
         _rb.bodyType = RigidbodyType2D.Kinematic;  // необходимо чтобы при столкновении двух коллайдеров они могли проходить сквозь друг друга.

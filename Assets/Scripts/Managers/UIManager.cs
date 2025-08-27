@@ -10,15 +10,17 @@ namespace Managers
     /// класс для хранения TMP для отображения информации о самолете
     /// </summary>
     [Serializable]
-    public class TMPFlightInfoUIGroup
+    public class DataLinks
     {
-        public static TMPFlightInfoUIGroup Instance { get; private set; } = null;
+        public static DataLinks Instance { get; private set; } = null;
 
-        public TextMeshProUGUI flightNameText { get; private set; }
+        public TextMeshProUGUI FlightNameText { get; private set; }
         public TextMeshProUGUI PlaneModelText { get; private set; }
-        public TextMeshProUGUI routeText { get; private set; }
-        public TextMeshProUGUI speedText { get; private set; }
-        public TextMeshProUGUI altitudeText { get; private set; }
+        public TextMeshProUGUI RouteText { get; private set; }
+        public TextMeshProUGUI SpeedText { get; private set; }
+        public TextMeshProUGUI AltitudeText { get; private set; }
+        public SelectPlaneManager SPM { get; private set; }
+        public PlaneConditionManager PCM { get; private set; }
 
 
         /// <summary>
@@ -29,30 +31,33 @@ namespace Managers
         {
             if (Instance == null)
             {
-                Instance = new TMPFlightInfoUIGroup();
-                var baseExceptionText = "The game object with name {0} does not have the \"TextMeshPro\" component. Please check it and try again.";
+                Instance = new DataLinks();
+                var TMPExceptionText = "The game object with name {0} does not have the \"TextMeshPro\" component. Please check it and try again.";
 
-                Instance.flightNameText = GameObject.Find("FlightName").GetComponent<TextMeshProUGUI>()
-                    ?? throw new MissingComponentException(string.Format(baseExceptionText, "FlightName"));
+                Instance.FlightNameText = GameObject.Find("FlightName").GetComponent<TextMeshProUGUI>()
+                    ?? throw new MissingComponentException(string.Format(TMPExceptionText, "FlightName"));
 
                 Instance.PlaneModelText = GameObject.Find("PlaneModel").GetComponent<TextMeshProUGUI>()
-                    ?? throw new MissingComponentException(string.Format(baseExceptionText, "PlaneModel"));
+                    ?? throw new MissingComponentException(string.Format(TMPExceptionText, "PlaneModel"));
 
-                Instance.routeText = GameObject.Find("Route").GetComponent<TextMeshProUGUI>()
-                    ?? throw new MissingComponentException(string.Format(baseExceptionText, "Route"));
+                Instance.RouteText = GameObject.Find("Route").GetComponent<TextMeshProUGUI>()
+                    ?? throw new MissingComponentException(string.Format(TMPExceptionText, "Route"));
 
-                Instance.speedText = GameObject.Find("Speed").GetComponent<TextMeshProUGUI>()
-                    ?? throw new MissingComponentException(string.Format(baseExceptionText, "Speed"));
+                Instance.SpeedText = GameObject.Find("Speed").GetComponent<TextMeshProUGUI>()
+                    ?? throw new MissingComponentException(string.Format(TMPExceptionText, "Speed"));
 
-                Instance.altitudeText = GameObject.Find("Altitude").GetComponent<TextMeshProUGUI>()
-                    ?? throw new MissingComponentException(string.Format(baseExceptionText, "Altitude"));
+                Instance.AltitudeText = GameObject.Find("Altitude").GetComponent<TextMeshProUGUI>()
+                    ?? throw new MissingComponentException(string.Format(TMPExceptionText, "Altitude"));
+
+                Instance.SPM = GameObject.FindWithTag("SPM")?.GetComponent<SelectPlaneManager>();
+                Instance.PCM = GameObject.FindWithTag("PCM")?.GetComponent<PlaneConditionManager>();
             }
         }
 
         /// <returns>все объекты TMP, хранящиеся в классе</returns>
         public TextMeshProUGUI[] GetAllTMPs()
         {
-            return new TextMeshProUGUI[] { flightNameText, PlaneModelText, routeText, speedText, altitudeText };
+            return new TextMeshProUGUI[] { FlightNameText, PlaneModelText, RouteText, SpeedText, AltitudeText };
         }
 
         /// <summary>

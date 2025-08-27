@@ -25,7 +25,7 @@ namespace Controllers
             Down
         }
 
-        private SelectPlaneManager _manager;
+        [SerializeField] private SelectPlaneManager _manager;
         private readonly Dictionary<Plane, (Tweener AltitudeTween,
                                             // Tweener YTween,
                                             TweenerCore<Quaternion, Vector3, QuaternionOptions> RotateTween,
@@ -35,7 +35,6 @@ namespace Controllers
 
         private void Start()
         {
-            _manager = SelectPlaneManager.Instance;
             mngr.SetIcon(PlaneConditionManager.Condition.HF);
         }
 
@@ -43,7 +42,7 @@ namespace Controllers
         {
             var selectedPlane = _manager.selectedPlane;
             if (selectedPlane == null) throw new InvalidOperationException("The selected plane is null � cannot continue.");
-            var curAltitude = int.Parse(TMPFlightInfoUIGroup.Instance.altitudeText.text.TrimEnd('K'));
+            var curAltitude = int.Parse(DataLinks.Instance.AltitudeText.text.TrimEnd('K'));
 
             var isUp = direction == ChangeDirection.Up;
             mngr.SetIcon(isUp ? PlaneConditionManager.Condition.Climbing : PlaneConditionManager.Condition.Descent);
@@ -62,7 +61,7 @@ namespace Controllers
             var targetAltitude = selectedPlane.flightLevels[nextAltitudeIndex];
             var targetY = PlaneCoordinatesCalculator._planesYs[nextAltitudeIndex];
 
-            TMPFlightInfoUIGroup.Instance.altitudeText.text = targetAltitude.ToString() + 'K';
+            DataLinks.Instance.AltitudeText.text = targetAltitude.ToString() + 'K';
             RunAltitudeAnimation(targetAltitude, targetY);
         }
 

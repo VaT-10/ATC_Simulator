@@ -49,6 +49,7 @@ public class PlaneGenerator : MonoBehaviour
     [SerializeField, NotNull] private GameObject _plane;  // префаб самолета
 
     [SerializeField, NotNull] private GameObject _mapBackground;
+    [SerializeField, NotNull] private SelectPlaneManager _slm;
 
     private float _timer;  // таймер, используемый для подсчета времени, прошедшего со спавна предыдущего самолета. увеличивается на Time.deltaTime каждый кадр.
 
@@ -62,7 +63,7 @@ public class PlaneGenerator : MonoBehaviour
     {
         CheckArgs();
         PlaneCoordinatesCalculator.CalculateCoordinates(SPAWN_OFFSET, LOCAL_MAX_SPAWN_Y, YS_COUNT, LOCAL_MASK_END_X);
-        TMPFlightInfoUIGroup.ClearAllText();
+        DataLinks.ClearAllText();
 
         CreatePlane();
     }
@@ -82,19 +83,9 @@ public class PlaneGenerator : MonoBehaviour
 
     private void CheckArgs()
     {
-        if (_plane == null)
-        {
-            throw new NullReferenceException("The plane prefab is missing.");
-        }
-        if (_mapBackground == null)
-        {
-            throw new NullReferenceException("The gameObject of mapBackground is missing.");
-        }
-        if (_spawnRate <= 0)
-        {
-            throw new ArgumentOutOfRangeException($"The spawnRate should be greater than 0, got {_spawnRate}");
-        }
-
+        if (_plane == null) throw new NullReferenceException("The plane prefab is missing.");
+        if (_mapBackground == null) throw new NullReferenceException("The gameObject of mapBackground is missing.");
+        if (_spawnRate <= 0) throw new ArgumentOutOfRangeException($"The spawnRate should be greater than 0, got {_spawnRate}");
     }
 
     /// <summary>
